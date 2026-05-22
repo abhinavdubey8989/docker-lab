@@ -19,3 +19,19 @@ sudo docker exec -e KAFKA_OPTS="" -it <container-name> /opt/kafka/bin/kafka-topi
   --describe \
   --topic my-topic-1 \
   --bootstrap-server kafka:9092
+
+
+
+# Start producing using console-producer
+sudo docker exec -e KAFKA_OPTS="" -it <container-name> /opt/kafka/bin/kafka-console-producer.sh \
+  --bootstrap-server kafka:9092 \
+  --topic my-topic-1
+
+
+
+# Start console-consumer (from beginning)
+sudo docker exec -e KAFKA_OPTS="" -it <container-name> /opt/kafka/bin/kafka-console-consumer.sh \
+  --bootstrap-server kafka:9092 \
+  --topic my-topic-1 \
+  --group my-group \
+  --from-beginning
