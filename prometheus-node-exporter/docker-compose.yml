@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+
+  prometheus-node-exporter:
+    image: prom/node-exporter:master-distroless
+    container_name: prometheus-node-exporter
+    restart: "no"
+
+
+    # - This allows a container to share the host's network stack directly instead of Docker’s default isolated bridge network
+    # - container bind directly on host IP (ie <host-ip:9100> instead of <container-ip:9100>)
+    # - If the application inside container is listening on port 4141, then: http://localhost:4141 or http://machine-ip:4141
+    #      will directly reach the process running inside the container.
+    # - There is no port forwarding layer & thus, this mode provides the highest network performance by 
+    #      eliminating the overhead of Docker’s virtual bridge and NAT
+    # - Any `ports` config in docker-compose file is ignored with this config
+    # - NOTE : this setting is optional, node-exporter can also work with port forwarding, but it might have slight n/w overhead
+    network_mode: host
+
+
+    # - This allows the container to interact with host machine's processes
+    # - It's commonly used for debugging-tools or monitoring-agents that need to inspect host-level processes
+    # - Since this container will export host machine's stats, we need to set as below
+    pid: host
+
+
+    # - Tells Node Exporter: "The actual host filesystem is mounted under /host"
+    # - Node Exporter then reads: /host/proc, /host/sys, /host/dev etc. instead of container filesystem
+    # - Without this: metrics would reflect container filesystem, not actual EC2 machine
+    command:
+      - '--path.rootfs=/host'
+
+
+    # - Mounts the host machine's root directory (/) onto the directory `/host` inside the container
+    # - ro (Read-Only): Ensures the container can only read files from the host and cannot modify or delete them, which is a critical security measure
+    # - rslave : Allows container to see dynamically mounted filesystems on host
+    # - This configuration tightly couples the container to the specific host it's running on & its used by monitoring tools
+    volumes:
+      - '/:/host:ro,rslave'
