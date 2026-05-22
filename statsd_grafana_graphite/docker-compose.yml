@@ -1,6 +1,7 @@
-version: '3'
+version: '3.8'
 
 services:
+
   statsd:
     image: statsd/statsd:sha-f7157b8
     container_name: statsd
@@ -11,6 +12,7 @@ services:
     volumes:
       - ./statsd/config.js:/usr/src/app/config.js:ro # data from host to container
       - ./statsd/console.js:/usr/src/app/backends/console.js:ro # data from host to container
+
 
   graphite:
     image: graphiteapp/graphite-statsd:1.1.10-5
@@ -31,6 +33,6 @@ services:
     ports:
       - "3000:3000" # ui
     environment:
-        - GF_SECURITY_ADMIN_PASSWORD=password
+        - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
     volumes:
       - ./_volume/grafana:/var/lib/grafana # store container data on host to inspect later
