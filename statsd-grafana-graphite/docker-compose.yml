@@ -10,8 +10,8 @@ services:
     ports:
       - "8125:8125/udp"
     volumes:
-      - ./statsd/config.js:/usr/src/app/config.js:ro # data from host to container
-      - ./statsd/console.js:/usr/src/app/backends/console.js:ro # data from host to container
+      - ./statsd/config.js:/usr/src/app/config.js:ro # bind-mount to supply data from host-machine to container
+      - ./statsd/console.js:/usr/src/app/backends/console.js:ro # bind-mount to supply data from host-machine to container
 
 
   graphite:
@@ -23,7 +23,7 @@ services:
       - "2003-2004:2003-2004"
       - "2023-2024:2023-2024"
     volumes:
-      - ./_volume/graphite:/opt/graphite/storage # store container data on host to inspect later
+      - ./_volume/graphite:/opt/graphite/storage # bind-mount for storing container data
 
 
   grafana:
@@ -35,4 +35,4 @@ services:
     environment:
         - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
     volumes:
-      - ./_volume/grafana:/var/lib/grafana # store container data on host to inspect later
+      - ./_volume/grafana:/var/lib/grafana

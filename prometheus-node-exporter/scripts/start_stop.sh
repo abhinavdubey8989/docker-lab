@@ -1,5 +1,5 @@
 
-# [Aim] : this script will start/stop the component
+# [Aim] : this script will start/stop the docker-compose component
 
 # [Arg-1] : START_STOP_FLAG (ie $1)
 #       - (0-> stop , 1-> start)
