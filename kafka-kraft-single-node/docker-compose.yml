@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+
+  kafka:
+    image: apache/kafka:4.3.0
+    container_name: kafka
+    restart: unless-stopped
+
+    ports:
+      - "9092:9092"
+      - "7071:7071"
+
+    environment:
+
+      # -----------------------------
+      # KRaft
+      # -----------------------------
+      KAFKA_NODE_ID: 1
+
+      KAFKA_PROCESS_ROLES: broker,controller
+
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+      KAFKA_LISTENERS: >
+        PLAINTEXT://0.0.0.0:9092,
+        CONTROLLER://0.0.0.0:9093
+
+      KAFKA_ADVERTISED_LISTENERS: >
+        PLAINTEXT://localhost:9092
+
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: >
+        PLAINTEXT:PLAINTEXT,
+        CONTROLLER:PLAINTEXT
+
+      KAFKA_CONTROLLER_QUORUM_VOTERS: >
+        1@localhost:9093
+
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
+      # -----------------------------
+      # Single node settings
+      # -----------------------------
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
+      # -----------------------------
+      # Storage
+      # -----------------------------
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+
+      # -----------------------------
+      # JMX Exporter
+      # -----------------------------
+      KAFKA_OPTS: >
+        -javaagent:/opt/jmx-exporter/jmx_prometheus_javaagent.jar=7071:/opt/jmx-exporter/kafka.yml
+
+    volumes:
+      # Kafka persistent storage
+      - ./_volume:/var/lib/kafka/data
+
+      # JMX exporter jar
+      - ../assets/jmx_prometheus_javaagent-1.5.0.jar:/opt/jmx-exporter/jmx_prometheus_javaagent.jar:ro
+
+      # JMX exporter config
+      - ./kafka/kafka.yml:/opt/jmx-exporter/kafka.yml:ro
