@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+
+  prometheus:
+    image: prom/prometheus:main-distroless
+    container_name: prometheus
+    restart: "no"
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro # bind-mount to supply data from host-machine to container
+      - ./_volume/prometheus:/prometheus # bind-mount for storing container data
