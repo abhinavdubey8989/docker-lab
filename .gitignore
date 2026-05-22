@@ -1,0 +1,3 @@
+
+# Any directory named with below name will not be committed in git
+**/_volume/
