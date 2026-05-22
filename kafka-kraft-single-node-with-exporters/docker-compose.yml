@@ -26,7 +26,6 @@ services:
         PLAINTEXT://0.0.0.0:9092,
         CONTROLLER://0.0.0.0:9093
 
-      # should not be : PLAINTEXT://localhost:9092
       KAFKA_ADVERTISED_LISTENERS: >
         PLAINTEXT://kafka:9092
 
@@ -34,7 +33,6 @@ services:
         PLAINTEXT:PLAINTEXT,
         CONTROLLER:PLAINTEXT
 
-      # should not be : PLAINTEXT://localhost:9092
       KAFKA_CONTROLLER_QUORUM_VOTERS: >
         1@kafka:9093
 
@@ -71,3 +69,26 @@ services:
 
       # JMX exporter config
       - ./kafka/kafka.yml:/opt/jmx-exporter/kafka.yml:ro
+
+
+  kafka-exporter:
+    image: danielqsj/kafka-exporter:v1.9.0
+    container_name: kafka-exporter
+    restart: unless-stopped
+    depends_on:
+      - kafka
+
+    ports:
+      - "9308:9308"
+
+    command:
+      - "--kafka.server=kafka:9092"
+
+      # Log errors & warnings only
+      - "--verbosity=1"
+
+      # Enable consumer group metrics
+      - "--group.filter=.*"
+
+      # Enable topic metrics
+      - "--topic.filter=.*"
