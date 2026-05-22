@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  statsd:
+    image: statsd/statsd:sha-f7157b8
+    container_name: statsd
+    restart: "no"
+    # tty: true
+    ports:
+      - "8125:8125/udp"
+    volumes:
+      - ./statsd/config.js:/usr/src/app/config.js:ro # data from host to container
+      - ./statsd/console.js:/usr/src/app/backends/console.js:ro # data from host to container
+
+  graphite:
+    image: graphiteapp/graphite-statsd:1.1.10-5
+    container_name: graphite
+    restart: "no"
+    ports:
+      - "8077:80"
+      - "2003-2004:2003-2004"
+      - "2023-2024:2023-2024"
+    volumes:
+      - ./_volume/graphite:/opt/graphite/storage # store container data on host to inspect later
+
+
+  grafana:
+    image: grafana/grafana:7.0.0
+    container_name: grafana
+    restart: "no"
+    ports:
+      - "3000:3000" # ui
+    environment:
+        - GF_SECURITY_ADMIN_PASSWORD=password
+    volumes:
+      - ./_volume/grafana:/var/lib/grafana # store container data on host to inspect later
