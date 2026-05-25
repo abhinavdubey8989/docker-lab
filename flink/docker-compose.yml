@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+
+  jobmanager:
+    image: apache/flink:2.2-java21
+    container_name: flink-jobmanager
+    restart: "no"
+
+    # These tell the Flink Docker image which Flink process to start
+    # because the SAME image contains: JobManager, TaskManager, CLI tools, SQL client
+    # The Dockerfile of apache/flink defines an ENTRYPOINT script (usually docker-entrypoint.sh). 
+    # The script checks its first argument, ie. $1=jobmanager
+    command: jobmanager
+
+    # Flink Dashboard & REST API : 8081
+    # JM serves Prometheus metrics on host port 9249
+    ports:
+      - "8081:8081"
+      - "9249:9249"
+
+    environment:
+      # JVM Heap
+      JVM_ARGS: "-Xms2g -Xmx2g"
+
+    volumes:
+      # Pass flink-config.yaml via bind-mount
+      - ./config/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml:ro
+
+      # Entire Flink data directory
+      - ./_volume/flink-data:/opt/flink-data
+
+      # Logs
+      - ./_volume/logs:/opt/flink/log
+
+    networks:
+      - flink-network
+
+
+  taskmanager:
+    image: apache/flink:2.2-java21
+    container_name: flink-taskmanager
+    restart: "no"
+    command: taskmanager
+    depends_on:
+      - jobmanager
+
+    # TM serves Prometheus metrics on host port 9249
+    ports:
+      - "9250:9249"
+
+    environment:
+      JVM_ARGS: "-Xms2g -Xmx2g"
+    
+    volumes:
+      - ./config/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml:ro
+      - ./_volume/flink-data:/opt/flink-data
+      - ./_volume/logs:/opt/flink/log
+
+    networks:
+      - flink-network
+
+
+networks:
+  flink-network:

@@ -1,0 +1,20 @@
+jobmanager.rpc.address: jobmanager
+parallelism.default: 2
+taskmanager.numberOfTaskSlots: 4
+
+
+# =========================
+# Checkpoints
+# =========================
+execution.checkpointing.interval: 30s
+state.checkpoints.dir: file:///opt/flink-data/checkpoints
+state.savepoints.dir: file:///opt/flink-data/savepoints
+
+
+# =========================
+# Prometheus Metrics
+# =========================
+
+# metrics.reporters: prom
+# metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
+# metrics.reporter.prom.port: 9249
