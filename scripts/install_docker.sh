@@ -2,19 +2,54 @@
 
 # [Aim] : this script will install docker on a linux based machine
 
-# [Sample usage] : "./<script>"
+# [Sample usage] : "./<script>.sh"
+
+
+# The below will exit the script immediately if any command fails.
+set -e
+
+
+verify_docker(){
+
+    # These should work without sudo
+    docker --version
+    docker compose version
+}
+
+
+enable_docker(){
+    sudo systemctl start docker
+    sudo systemctl enable docker
+    sudo systemctl status docker --no-pager
+}
+
+
 
 
 main(){
 
-    sudo apt update
-    sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
-    sudo apt install net-tools
+
+    # tells Ubuntu package installers: Never ask interactive questions
+    export DEBIAN_FRONTEND=noninteractive
+
+    sudo apt update -y
+    sudo apt-get install -y \
+        apt-transport-https \
+        ca-certificates \
+        curl \
+        software-properties-common \
+        gnupg \
+        lsb-release \
+        net-tools
+
+
+    echo "Creating docker keyring directory..."
     sudo install -m 0755 -d /etc/apt/keyrings
 
-   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
-   sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-   sudo chmod a+r /etc/apt/keyrings/docker.gpg
+    echo "Adding Docker GPG key..."
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+    sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    sudo chmod a+r /etc/apt/keyrings/docker.gpg
 
     echo \
     "deb [arch=$(dpkg --print-architecture) \
@@ -23,14 +58,21 @@ main(){
     $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
     sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-    sudo apt-get update
-    sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-    docker --version
-    docker compose version
+    echo "Updating package index with Docker repo..."
+    sudo apt-get update -y
 
-    sudo systemctl start docker
-    sudo systemctl enable docker
+    echo "Installing Docker..."
+    sudo apt-get install -y \
+        docker-ce \
+        docker-ce-cli \
+        containerd.io \
+        docker-buildx-plugin \
+        docker-compose-plugin
+
+
+    enable_docker
+    verify_docker
 }
 
 
