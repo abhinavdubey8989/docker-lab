@@ -1,22 +1,31 @@
 
-# [Aim] : this script will start/stop the docker-compose component
 
+#!/bin/bash
 
-# [Arg-1] : DIR name (ie $1)
-#       - give DIR name to go to
-
-# [Arg-2] : START_STOP_FLAG (ie $1)
-#       - (0-> stop , 1-> start)
-#       - any other value of this flag is invalid
-
-# [Arg-3] to start in attach or detach mode , pass ATTACH_MODE_FLAG (ie $2)
-#       - (a-> attach , d-> detach) ,
-#       - any other value of this flag is invalid
-
-# [Sample usage]
-#       - "./<script> prometheus-server 1 a"  -> will start in attach mode
-#       - "./<script> prometheus-server 1" or "./<script> 1 d"  -> will start in detach-mode
-#       - "./<script> prometheus-server 0" -> will stop the container
+# ============================================================================
+# [Aim]
+# This script will start/stop the docker-compose components in a given dir in attach/detach mode
+#
+# [Assumption]
+# Docker is ALREADY installed
+#
+# [Usage]
+#    - "./<script> prometheus-server 1 a"  -> will start in attach mode
+#    - "./<script> prometheus-server 1" or "./<script> 1 d"  -> will start in detach-mode
+#    - "./<script> prometheus-server 0" -> will stop the container
+# 
+# [Arguments]
+#
+# - [Arg-1] - DIR name (ie $1)
+#           - give DIR name to go to
+# - [Arg-2] - START_STOP_FLAG (ie $1)
+#           - (0-> stop , 1-> start)
+#           - any other value of this flag is invalid
+# - [Arg-3] -to start in attach or detach mode , pass ATTACH_MODE_FLAG (ie $2)
+#           - (a-> attach , d-> detach) ,
+#           - any other value of this flag is invalid
+# 
+# ============================================================================
 
 
 # Util fn to stop docker-compose

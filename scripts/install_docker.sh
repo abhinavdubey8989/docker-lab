@@ -1,11 +1,18 @@
+#!/bin/bash
+
+# ============================================================================
+# [Aim]
+# This script will install docker on a linux based machine
+#
+# [Usage]
+#  - chmod +x <script>.sh
+#  - ./<script>.sh
+#
+# ============================================================================
 
 
-# [Aim] : this script will install docker on a linux based machine
-
-# [Sample usage] : "./<script>.sh"
-
-
-# The below will exit the script immediately if any command fails.
+# The below will exit the script immediately if any command fails
+# Prevents partial/broken installations
 set -e
 
 
