@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+
+  grafana:
+    image: grafana/grafana:main-distroless-slim
+    container_name: grafana
+    restart: "no"
+    ports:
+      - "3000:3000"
+
+    environment:
+      # Default login credentials
+      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+
+      # Optional: disable signup
+      - GF_USERS_ALLOW_SIGN_UP="false"
+
+    volumes:
+      - ./_volume:/var/lib/grafana
