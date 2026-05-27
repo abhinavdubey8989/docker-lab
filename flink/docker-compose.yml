@@ -27,7 +27,7 @@ services:
       # Pass flink-config.yaml via bind-mount
       - ./config/flink-config.yaml:/opt/flink/conf/config.yaml:ro
 
-      # Entire Flink-data directory
+      # For checkpoints
       - ./_volume/flink-data:/opt/flink-data
 
       # Logs
