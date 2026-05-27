@@ -25,7 +25,7 @@ services:
 
     volumes:
       # Pass flink-config.yaml via bind-mount
-      - ./config/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml:ro
+      - ./config/flink-config.yaml:/opt/flink/conf/config.yaml:ro
 
       # Entire Flink data directory
       - ./_volume/flink-data:/opt/flink-data
@@ -53,7 +53,7 @@ services:
       JVM_ARGS: "-Xms2g -Xmx2g"
     
     volumes:
-      - ./config/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml:ro
+      - ./config/flink-config.yaml:/opt/flink/conf/config.yaml:ro
       - ./_volume/flink-data:/opt/flink-data
       - ./_volume/logs:/opt/flink/log
 
