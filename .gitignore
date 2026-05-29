@@ -8,3 +8,6 @@ secrets/*
 
 # Temporary files
 assets/temp/*
+
+# JAR files
+**/job-jars

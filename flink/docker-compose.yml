@@ -1,0 +1,86 @@
+version: "3.8"
+
+services:
+  jobmanager:
+    image: apache/flink:2.2-java21
+    container_name: flink-jobmanager
+    restart: "no"
+
+    # This tell the Flink Docker image which Flink process to start
+    # because the SAME image contains: JobManager, TaskManager, CLI tools, SQL client
+    # The Dockerfile of apache/flink defines an ENTRYPOINT script (usually docker-entrypoint.sh)
+    # The script checks its first argument, ie. $1=jobmanager
+    command: jobmanager
+
+    # Flink Dashboard & REST API : 8081
+    ports:
+      - "8081:8081"
+
+    environment:
+      # JVM Heap
+      JVM_ARGS: "-Xms2g -Xmx2g"
+
+      # This is need for the Java JAR to pick the correct properties files
+      # In this case : application-docker.properties (ie application-<environment>.properties)
+      # Both, TM & JM need to have this config
+      APP_ENV: docker
+
+    volumes:
+      # Pass flink-config.yaml via bind-mount
+      - ./flink/flink-config.yaml:/opt/flink/conf/config.yaml:ro
+
+      # Pass the flink-job JARs from host via bind-mount
+      # Place the JAR files in this dir on host machine
+      - ./job-jars:/opt/flink/job-jars:ro
+
+      # For checkpoints
+      - ./_volume/flink/flink-data:/opt/flink-data
+
+      # Logs
+      - ./_volume/flink/logs:/opt/flink/log
+
+    networks:
+      - flink-network
+
+  taskmanager:
+    image: apache/flink:2.2-java21
+    container_name: flink-taskmanager
+    restart: "no"
+    command: taskmanager
+    depends_on:
+      - jobmanager
+
+    environment:
+      JVM_ARGS: "-Xms2g -Xmx2g"
+      APP_ENV: docker
+
+    volumes:
+      - ./flink/flink-config.yaml:/opt/flink/conf/config.yaml:ro
+      - ./_volume/flink/flink-data:/opt/flink-data
+      - ./_volume/flink/logs:/opt/flink/log
+
+    networks:
+      - flink-network
+
+  kafka:
+    image: apache/kafka:4.3.0
+    container_name: kafka
+    restart: unless-stopped
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+      - "7071:7071"
+
+    # Instead of adding lots of `enviroment` here, use dedicated env file
+    # The other possible option is : using bind-mount to pass the file from host & `command` argument from docker-compose
+    env_file:
+      - ./kafka/server.properties
+
+    volumes:
+      - ./_volume/kafka:/var/lib/kafka/data
+
+    networks:
+      - flink-network
+
+networks:
+  flink-network:
