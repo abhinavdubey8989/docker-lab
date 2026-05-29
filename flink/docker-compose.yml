@@ -6,9 +6,9 @@ services:
     container_name: flink-jobmanager
     restart: "no"
 
-    # These tell the Flink Docker image which Flink process to start
+    # This tell the Flink Docker image which Flink process to start
     # because the SAME image contains: JobManager, TaskManager, CLI tools, SQL client
-    # The Dockerfile of apache/flink defines an ENTRYPOINT script (usually docker-entrypoint.sh).
+    # The Dockerfile of apache/flink defines an ENTRYPOINT script (usually docker-entrypoint.sh)
     # The script checks its first argument, ie. $1=jobmanager
     command: jobmanager
 
@@ -23,6 +23,7 @@ services:
       JVM_ARGS: "-Xms2g -Xmx2g"
 
       # This is need for the Java JAR to pick the correct properties files
+      # In this case : application-docker.properties (ie application-<environment>.properties)
       # Both, TM & JM need to have this config
       APP_ENV: docker
 
