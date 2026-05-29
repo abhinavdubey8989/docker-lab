@@ -13,10 +13,8 @@ services:
     command: jobmanager
 
     # Flink Dashboard & REST API : 8081
-    # JM serves Prometheus metrics on host port 9249
     ports:
       - "8081:8081"
-      - "9249:9249"
 
     environment:
       # JVM Heap
@@ -51,10 +49,6 @@ services:
     command: taskmanager
     depends_on:
       - jobmanager
-
-    # TM serves Prometheus metrics on host port 9249
-    ports:
-      - "9250:9249"
 
     environment:
       JVM_ARGS: "-Xms2g -Xmx2g"
