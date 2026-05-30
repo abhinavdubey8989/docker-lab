@@ -65,3 +65,51 @@ docker exec -it flink-jobmanager flink run /opt/flink/job-jars/your-jar-name.jar
 
 # Expected behaviour is the log : Job has been submitted with JobID <job-id>
 ```
+
+- Kafka CLI commands
+```
+# List the topics
+docker exec -e KAFKA_OPTS="" -it kafka /opt/kafka/bin/kafka-topics.sh \
+    --bootstrap-server kafka:9092 \
+    --list
+
+
+# Create a topic
+docker exec -e KAFKA_OPTS="" -it kafka /opt/kafka/bin/kafka-topics.sh \
+  --bootstrap-server kafka:9092 \
+  --create --if-not-exists \
+  --topic YOUR_TOPIC_NAME \
+  --partitions 1 \
+  --replication-factor 1
+
+
+# Delete a topic
+docker exec -e KAFKA_OPTS="" -it kafka /opt/kafka/bin/kafka-topics.sh \
+  --bootstrap-server kafka:9092 \
+  --delete \
+  --topic YOUR_TOPIC_NAME
+
+
+# Describe a topic
+docker exec -it kafka /opt/kafka/bin/kafka-topics.sh \
+  --bootstrap-server kafka:9092 \
+  --describe \
+  --topic YOUR_TOPIC_NAME
+
+
+
+# Start console-producer on a topic
+docker exec -e KAFKA_OPTS="" -it kafka /opt/kafka/bin/kafka-console-producer.sh \
+  --bootstrap-server kafka:9092 \
+  --topic YOUR_TOPIC_NAME
+
+
+
+# Start console-consumer on a topic
+docker exec -e KAFKA_OPTS="" -it kafka /opt/kafka/bin/kafka-console-consumer.sh \
+  --bootstrap-server kafka:9092 \
+  --topic YOUR_TOPIC_NAME \
+  --group cli-group \
+  --from-beginning
+
+```
