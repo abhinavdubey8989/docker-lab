@@ -9,6 +9,14 @@ services:
     # This container can run only CPU core #0 & #1 out of, say 12 cores
     cpuset: "0-1"
 
+    # Limit RAM to 2 GB
+    # can be verified using `cat /sys/fs/cgroup/memory.max` from the container CLI
+    mem_limit: 2g
+
+    # limits the total number of processes (threads/processes) that can run simultaneously inside the container
+    # This limit applies to all processes, including the main container process (/bin/sh), its children, and any background or zombie processes
+    # Uses the Linux cgroup pids controller, can we verified using : `cat /sys/fs/cgrouppids.max`
+    pids_limit: 50
 
     volumes:
       # Pass the scripts dir as read-only bind-mount
