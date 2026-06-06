@@ -15,7 +15,7 @@
 #   - Adds current user to docker group & allow docker commands without sudo
 #   - By default, ubuntu user is not a part of docker group
 #   - You can verify this by running : `getent group docker`
-# 
+#
 # ============================================================================
 
 
@@ -27,8 +27,7 @@ set -e
 main() {
 
     # Add currently logged-in user to docker group
-    # This allows running: docker ps, 
-    # instead of: sudo docker ps
+    # This allows running: docker ps, instead of: sudo docker ps
     sudo usermod -aG docker "$USER"
 
 

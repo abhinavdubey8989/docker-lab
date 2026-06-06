@@ -1,22 +1,59 @@
-
 global:
-  scrape_interval: 5s
-  scrape_timeout: 4s
-
+  scrape_interval: 30s
+  scrape_timeout: 5s
 
 scrape_configs:
 
-  - job_name: 'node-exporter'
+  # -----------------------------
+  # Node Exporter (EC2 hosts)
+  # monitor host metrics (CPU, memory, disk, filesystem, network etc.)
+  # -----------------------------
+  - job_name: "node-exporter"
     static_configs:
       - targets:
-          - '98.87.17.102:9100'
+          - "1.2.3.4:9100"
+        labels:
+          server: "server-a"
 
-  - job_name: 'kafka-jmx'
-    static_configs:
       - targets:
-          - '98.87.17.102:7071'
+          - "1.2.3.5:9100"
+        labels:
+          server: "server-b"
 
-  - job_name: 'kafka-exporter'
+  # -----------------------------
+  # Kafka JMX Exporter
+  # monitor Kafka-cluster JVM metrics, GC, memory, threads, and internal broker performance (via JMX)
+  # -----------------------------
+  - job_name: "kafka-jmx"
     static_configs:
       - targets:
-          - '98.87.17.102:9308'
+          - "1.2.3.6:7071"
+
+  # -----------------------------
+  # Kafka Exporter
+  # monitor Kafka-cluster : Consumer-lag, topic-offsets, partition-level consumption metrics etc.
+  # -----------------------------
+  - job_name: "kafka-exporter"
+    static_configs:
+      - targets:
+          - "kafka-exporter:9308"
+        labels:
+          server: "json"
+
+  # -----------------------------
+  # Spring Boot Producer App
+  # monitor application-level metrics like request latency, JVM metrics, custom business metrics, and Prometheus actuator metrics
+  # -----------------------------
+  - job_name: "kafka-producer-app"
+    metrics_path: "/actuator/prometheus"
+    scrape_interval: 5s
+    static_configs:
+      - targets:
+          - "host.docker.internal:9111"
+        labels:
+          server: "json"
+
+      - targets:
+          - "producer:9111"
+        labels:
+          server: "avro"
