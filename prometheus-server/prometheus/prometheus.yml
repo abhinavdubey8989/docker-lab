@@ -27,7 +27,9 @@ scrape_configs:
   - job_name: "kafka-jmx"
     static_configs:
       - targets:
-          - "1.2.3.6:7071"
+          - "kafka:7071"
+        labels:
+          server: "json"
 
   # -----------------------------
   # Kafka Exporter
