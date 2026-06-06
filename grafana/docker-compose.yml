@@ -1,7 +1,6 @@
-version: '3.8'
+version: "3.8"
 
 services:
-
   grafana:
     image: grafana/grafana:main-distroless-slim
     container_name: grafana
