@@ -8,6 +8,27 @@
 - Kafka CLI commands can be found at : `flink/README.md`
 
 
+
+## Why use Kafka-exporter & kafka-jmx exporter both? The difference
+- They solve different layers of the Kafka observability problem
+
+
+| Feature         | JMX Exporter            | Kafka Exporter      |
+| --------------- | ----------------------- | ------------------- |
+| Source          | Kafka JVM (broker)      | Kafka APIs          |
+| Focus           | Broker health           | Consumer lag        |
+| Level           | Infrastructure          | Data flow           |
+| Metrics type    | Internal system metrics | Consumption metrics |
+| Talks to Kafka? | ❌ No                   | ✅ Yes               |
+| Talks to JVM?   | ✅ Yes                  | ❌ No                |
+
+- To get full observability, use both : 
+  - Broker health (JMX)
+  - Consumer lag (Kafka exporter)
+
+- One is not a substitute/replacement of the other
+
+
 ## Docker image(s) reference
 - [apache/kafka](https://hub.docker.com/r/apache/kafka)
 - [schema registry](https://hub.docker.com/r/confluentinc/cp-schema-registry)
