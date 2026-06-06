@@ -1,7 +1,10 @@
-version: '3.8'
+version: "3.8"
+
+networks:
+  flink_flink-network:
+    external: true
 
 services:
-
   prometheus:
     image: prom/prometheus:main-distroless
     container_name: prometheus
@@ -11,3 +14,5 @@ services:
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro # bind-mount to supply data from host-machine to container
       - ./_volume/prometheus:/prometheus # bind-mount for storing container data
+    networks:
+      - flink_flink-network
