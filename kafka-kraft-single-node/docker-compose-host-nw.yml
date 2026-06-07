@@ -18,6 +18,7 @@ services:
     # configs for container process startup
     # used for : KAFKA_OPTS (JMX exporter), heap size (KAFKA_HEAP_OPTS), debug flags, JVM tuning
     environment:
+      KAFKA_HEAP_OPTS: "-Xms1g -Xmx1g -XX:+UseG1GC"
       KAFKA_OPTS: >-
         -javaagent:/opt/jmx-exporter/jmx_prometheus_javaagent.jar=7071:/opt/jmx-exporter/kafka.yml
 
