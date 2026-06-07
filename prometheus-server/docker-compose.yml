@@ -1,18 +1,27 @@
 version: "3.8"
 
-networks:
-  kafka-kraft-single-node_kfk-network:
-    external: true
-
 services:
   prometheus:
     image: prom/prometheus:main-distroless
     container_name: prometheus
     restart: "no"
+
     ports:
       - "9090:9090"
+
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro # bind-mount to supply data from host-machine to container
-      - ./_volume/prometheus:/prometheus # bind-mount for storing container data
+      # Prometheus configuration
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+
+      # Prometheus TSDB data
+      - prometheus-data:/prometheus
+
     networks:
-      - kafka-kraft-single-node_kfk-network
+      - monitoring
+
+volumes:
+  prometheus-data:
+
+networks:
+  monitoring:
+    external: true

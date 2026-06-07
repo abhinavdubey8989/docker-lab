@@ -38,7 +38,10 @@ services:
   kafka-exporter:
     image: danielqsj/kafka-exporter:v1.9.0
     container_name: kafka-exporter
-    restart: "no"
+
+    # kafka-exporter does not wait till kafka is healthy
+    # so restart this on failure
+    restart: on-failure
     depends_on:
       - kafka
     ports:
