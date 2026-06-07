@@ -1,0 +1,63 @@
+version: "3.8"
+
+services:
+  kafka:
+    image: apache/kafka:4.3.0
+    container_name: kafka
+    restart: "no"
+
+    # Share host network namespace
+    network_mode: host
+
+    # Instead of adding lots of `enviroment` here, use dedicated env file
+    # The other possible option is : using bind-mount to pass the file from host & `command` argument from docker-compose
+    # These variables are injected as environment variables into the container (verify using `echo $CLUSTER_ID` in the container shell)
+    env_file:
+      - ./kafka/server-host-nw.properties
+
+    # configs for container process startup
+    # used for : KAFKA_OPTS (JMX exporter), heap size (KAFKA_HEAP_OPTS), debug flags, JVM tuning
+    environment:
+      KAFKA_OPTS: >-
+        -javaagent:/opt/jmx-exporter/jmx_prometheus_javaagent.jar=7071:/opt/jmx-exporter/kafka.yml
+
+    volumes:
+      # Kafka persistent storage
+      - ./_volume/kafka:/var/lib/kafka/data
+
+      # JMX exporter jar
+      - ../assets/jmx_prometheus_javaagent-1.5.0.jar:/opt/jmx-exporter/jmx_prometheus_javaagent.jar:ro
+
+      # JMX exporter config
+      - ./kafka/kafka-jmx-exporter.yml:/opt/jmx-exporter/kafka.yml:ro
+
+  kafka-exporter:
+    image: danielqsj/kafka-exporter:v1.9.0
+    container_name: kafka-exporter
+    restart: "no"
+    depends_on:
+      - kafka
+    network_mode: host
+    command:
+      - "--kafka.server=localhost:9092"
+
+      # Log errors & warnings only
+      - "--verbosity=1"
+
+      # Enable consumer group metrics
+      - "--group.filter=.*"
+
+      # Enable topic metrics
+      - "--topic.filter=.*"
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.6.0
+    container_name: schema-registry
+    restart: "no"
+    depends_on:
+      - kafka
+    network_mode: host
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: localhost:9092
