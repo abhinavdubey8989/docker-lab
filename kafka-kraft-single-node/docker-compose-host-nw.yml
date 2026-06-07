@@ -23,13 +23,13 @@ services:
         -javaagent:/opt/jmx-exporter/jmx_prometheus_javaagent.jar=7071:/opt/jmx-exporter/kafka.yml
 
     volumes:
-      # Kafka persistent storage
-      - ./_volume/kafka:/var/lib/kafka/data
+      # Kafka persistent storage (named volumn)
+      - kafka-data:/var/lib/kafka/data
 
-      # JMX exporter jar
+      # JMX exporter jar (passed from host to container)
       - ../assets/jmx_prometheus_javaagent-1.5.0.jar:/opt/jmx-exporter/jmx_prometheus_javaagent.jar:ro
 
-      # JMX exporter config
+      # JMX exporter config (passed from host to container)
       - ./kafka/kafka-jmx-exporter.yml:/opt/jmx-exporter/kafka.yml:ro
 
   kafka-exporter:
@@ -65,3 +65,6 @@ services:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: localhost:9092
+
+volumes:
+  kafka-data:
