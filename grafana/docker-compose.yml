@@ -17,4 +17,14 @@ services:
       - GF_USERS_ALLOW_SIGN_UP="false"
 
     volumes:
-      - ./_volume:/var/lib/grafana
+      - grafana-data:/var/lib/grafana
+
+    networks:
+      - monitoring
+
+volumes:
+  grafana-data:
+
+networks:
+  monitoring:
+    external: true
