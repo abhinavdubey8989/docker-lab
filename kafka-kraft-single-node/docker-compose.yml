@@ -13,8 +13,15 @@ services:
 
     # Instead of adding lots of `enviroment` here, use dedicated env file
     # The other possible option is : using bind-mount to pass the file from host & `command` argument from docker-compose
+    # These variables are injected as environment variables into the container (verify using `echo $CLUSTER_ID` in the container shell)
     env_file:
       - ./kafka/server.properties
+
+    # configs for container process startup
+    # used for : KAFKA_OPTS (JMX exporter), heap size (KAFKA_HEAP_OPTS), debug flags, JVM tuning
+    environment:
+      KAFKA_OPTS: >-
+        -javaagent:/opt/jmx-exporter/jmx_prometheus_javaagent.jar=7071:/opt/jmx-exporter/kafka.yml
 
     volumes:
       # Kafka persistent storage

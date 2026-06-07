@@ -6,6 +6,18 @@ services:
     container_name: prometheus-node-exporter
     restart: "no"
 
+    # This container can run only CPU core #0 out of the total cores
+    cpuset: "0"
+
+    # Limit RAM to 128 MB
+    # can be verified using `cat /sys/fs/cgroup/memory.max` from the container CLI
+    mem_limit: 128m
+
+    # limits the total number of processes (threads/processes) that can run simultaneously inside the container
+    # This limit applies to all processes, including the main container process (/bin/sh), its children, and any background or zombie processes
+    # Uses the Linux cgroup pids controller, can we verified using : `cat /sys/fs/cgrouppids.max`
+    pids_limit: 50
+
     # - This allows a container to share the host's network stack directly instead of Docker’s default isolated bridge network
     # - container bind directly on host IP (ie <host-ip:9100> instead of <container-ip:9100>)
     # - If the application inside container is listening on port 4141, then: http://localhost:4141 or http://machine-ip:4141
