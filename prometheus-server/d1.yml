@@ -1,0 +1,27 @@
+# version: "3.8"
+
+services:
+  prometheus:
+    image: prom/prometheus:main-distroless
+    container_name: prometheus
+    restart: "no"
+
+    ports:
+      - "9090:9090"
+
+    volumes:
+      # Prometheus configuration
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+
+      # Prometheus TSDB data
+      - prometheus-data:/prometheus
+
+    networks:
+      - monitoring
+
+volumes:
+  prometheus-data:
+
+networks:
+  monitoring:
+    external: true

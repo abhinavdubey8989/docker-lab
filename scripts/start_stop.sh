@@ -6,50 +6,47 @@
 # [Aim]
 # This script will start/stop the docker-compose components in a given dir in attach/detach mode
 #
+# 
 # [Assumption]
-# Docker is ALREADY installed
+# - Docker is installed
 #
-# [Usage ::: when using docker-compose.yml as the compose file]
-#    - "./<script> prometheus-server 1 a"  -> will start in attach mode
-#    - "./<script> prometheus-server 1" or "./<script> 1 d"  -> will start in detach-mode
-#    - "./<script> prometheus-server 0" -> will stop the container
 # 
 # [Arguments]
+# --file=<dir_name>
+#     Uses <dir_name>/docker-compose.yml
 #
-# - [Arg-1] - DIR name (ie $1)
-#           - give DIR name to go to
-# - [Arg-2] - START_STOP_FLAG (ie $1)
-#           - (0-> stop , 1-> start)
-#           - any other value of this flag is invalid
-# - [Arg-3] - to start in attach or detach mode , pass ATTACH_MODE_FLAG (ie $2)
-#           - (a-> attach , d-> detach) ,
-#           - any other value of this flag is invalid
-#           - NOT NEEDED IF ARG-2 IS 0 (ie. you want to stop the setup)
-# 
-# 
-# [Usage ::: when using docker-compose-xyz.yml as the compose file]
-#    - "./<script> prometheus-server 1 a docker-compose-xyz.yml"  -> will start in attach mode
-#    - "./<script> prometheus-server 1 d docker-compose-xyz.yml"  -> will start in detach-mode
-#    - "./<script> prometheus-server 0 d docker-compose-xyz.yml"  -> will stop the container
-# 
-# [Arguments]
+# --file=<dir_name>/<compose_file>
+#     Uses the specified compose file
 #
-# - [Arg-1] - DIR name (ie $1)
-#           - give DIR name to go to
-# - [Arg-2] - START_STOP_FLAG (ie $1)
-#           - (0-> stop , 1-> start)
-#           - any other value of this flag is invalid
-# - [Arg-3] -to start in attach or detach mode , pass ATTACH_MODE_FLAG (ie $2)
-#           - (a-> attach , d-> detach) ,
-#           - any other value of this flag is invalid
-#           - NEEDED REGARDLESS of ARG-2
-# - [Arg-4] - the yml file name (as a replacement of docker-compose.yml)
+# --action=<0|1>
+#     0 -> stop
+#     1 -> start
+#
+# --mode=<a|d>
+#     a -> attach mode
+#     d -> detach mode (default)
+#
 # 
+# [Examples]
+# 
+# Starting file named : docker-compose.yml
+# ./start_stop.sh --file=prometheus-server --action=1
+# ./start_stop.sh --file=prometheus-server --action=1 --mode=a
+#
+# Starting a custom yml file (here, `d1.yml`)
+# ./start_stop.sh --file=prometheus-server/d1.yml --action=1
+# ./start_stop.sh --file=prometheus-server/d1.yml --action=1 --mode=a
+#
+# Stopping
+# ./start_stop.sh --file=prometheus-server --action=0
+# ./start_stop.sh --file=prometheus-server/d1.yml --action=0
+#
 # ============================================================================
 
 
 # Util fn to stop docker-compose
 stop() {
+    COMPOSE_FILE=$1
     docker compose -f "$COMPOSE_FILE" down
     docker container prune -f
     echo "stopped $PWD/$COMPOSE_FILE ..."
@@ -58,6 +55,7 @@ stop() {
 
 # Util fn to start docker-compose in attach mode
 start_attach() {
+    COMPOSE_FILE=$1
     echo "attach mode, for $COMPOSE_FILE"
     docker compose -f "$COMPOSE_FILE" up
 }
@@ -65,26 +63,66 @@ start_attach() {
 
 # Util fn to start docker-compose in detach mode
 start_detach() {
+    COMPOSE_FILE=$1
     echo "detach mode, for $COMPOSE_FILE"
     docker compose -f "$COMPOSE_FILE" up -d
 }
 
 
-# Util fn to check if the DIR_NAME & has a docker-compose file
-# If valid dir, it returns the DIR name
+# Util fn to parse the first argument.
+#
+# Supported formats:
+#
+# Case-1:
+#   dir_name/docker-compose-custom.yml
+#
+#   Returns:
+#     dir_name|docker-compose-custom.yml
+#
+# Case-2:
+#   dir_name
+#
+#   Returns:
+#     dir_name|docker-compose.yml
+#
+# If no "/" is present, docker-compose.yml is assumed.
+parse_dir_and_compose_file() {
+    FILE_PATH=$1
+
+    if [ -z "$FILE_PATH" ]; then
+        echo "Directory name is required"
+        exit 1
+    fi
+
+    if [[ "$FILE_PATH" == */* ]]; then
+        DIR_NAME="${FILE_PATH%%/*}"
+        COMPOSE_FILE_NAME="${FILE_PATH#*/}"
+    else
+        DIR_NAME="$FILE_PATH"
+        COMPOSE_FILE_NAME="docker-compose.yml"
+    fi
+
+    echo "$DIR_NAME|$COMPOSE_FILE_NAME"
+}
+
+
+# Util fn to check if the DIR_NAME & has the require docker-compose file
+# If valid dir, it returns the DIR name (only the dir name, without the docker yml file name)
 validate_dir() {
-    DIR_NAME=$1
-    COMPOSE_FILE_NAME=$2
+    FILE_PATH=$1
 
-    PROJECT_DIR="$(dirname "$(pwd)")"
-    # enable the below log if debugging needed
-    # echo "PROJECT_DIR=[$PROJECT_DIR]"
+    PARSED_DIR_AND_FILE=$(parse_dir_and_compose_file "$FILE_PATH")
 
-    TARGET_DIR="$PROJECT_DIR/$DIR_NAME"
+    # seggregate the dir & file-name
+    DIR_NAME="${PARSED_DIR_AND_FILE%%|*}"
+    COMPOSE_FILE_NAME="${PARSED_DIR_AND_FILE#*|}"
 
-    # enable the below log if debugging needed
-    # echo "TARGET_DIR=[$TARGET_DIR]"
+    CURRENT_PROJECT_DIR="$(dirname "$(pwd)")"
 
+    # TARGET_DIR is the directory where the compose.yml file present
+    TARGET_DIR="$CURRENT_PROJECT_DIR/$DIR_NAME"
+
+    # Check if TARGET_DIR valid & compose.yml exists
     if [ -z "$DIR_NAME" ]; then
         echo "Directory name is required"
         exit 1
@@ -107,57 +145,82 @@ validate_dir() {
 
 # Util fn to validate START_OR_STOP_FLAG
 # If valid flag & its value is 0 (ie. to stop), then it stops & returns
-validate_start_or_stop_flag() {
+validate_action() {
     START_OR_STOP_FLAG=$1
 
     if [ -z "$START_OR_STOP_FLAG" ]; then
-        echo "Invalid value of start/stop flag"
+        echo "START_OR_STOP_FLAG is required"
         exit 1
+    fi
 
-    elif [ "$START_OR_STOP_FLAG" = "0" ]; then
-        stop
-        exit 0
-
-    elif [ "$START_OR_STOP_FLAG" != "1" ]; then
-        echo "Invalid value of start/stop flag"
+    if [ "$START_OR_STOP_FLAG" != "0" ] && [ "$START_OR_STOP_FLAG" != "1" ]; then
+        echo "Invalid START_OR_STOP_FLAG: [$START_OR_STOP_FLAG]"
+        echo "Allowed values: 0 (stop), 1 (start)"
         exit 1
     fi
 }
 
 
-# Util fn to get docker-compose file name
-# Defaults to docker-compose.yml
-get_compose_file() {
-    COMPOSE_FILE_NAME=$1
-
-    if [ -z "$COMPOSE_FILE_NAME" ]; then
-        echo "docker-compose.yml"
-    else
-        echo "$COMPOSE_FILE_NAME"
-    fi
+# This fn parses the key passed as arg to the script
+# and sets the global vars, these vars begin with prefix `GL_`
+parse_args() {
+    for arg in "$@"; do
+        case $arg in
+            --file=*)
+                GL_FILE_PATH="${arg#*=}"
+                ;;
+            --action=*)
+                GL_ACTION="${arg#*=}"
+                ;;
+            --mode=*)
+                GL_ATTACH_MODE_FLAG="${arg#*=}"
+                ;;
+            *)
+                echo "Unknown argument: $arg"
+                exit 1
+                ;;
+        esac
+    done
 }
-
 
 main(){
-    DIR_NAME=$1
-    START_OR_STOP_FLAG=$2
-    ATTACH_MODE_FLAG=$3
-    COMPOSE_FILE_NAME=$4
 
-    COMPOSE_FILE=$(get_compose_file "$COMPOSE_FILE_NAME")
-    TARGET_DIR=$(validate_dir "$DIR_NAME" "$COMPOSE_FILE")
+    # Set global vars, will be used later in main fn
+    parse_args "$@"
 
-    cd "$TARGET_DIR" || exit 1
-    echo "Inside the DIR=[$TARGET_DIR]"
-    validate_start_or_stop_flag "$START_OR_STOP_FLAG"
+    # validate the start-stop flag value
+    validate_action "$GL_ACTION"
 
-    # Stop unconditionally first
-    # Then, start attach/detach mode
-    stop
-    if [ -z "$ATTACH_MODE_FLAG" ] || [ "$ATTACH_MODE_FLAG" = "d" ]; then
-        start_detach
-    elif [ "$ATTACH_MODE_FLAG" = "a" ]; then
-        start_attach
+    # Validate the FILE_PATH given
+    # Validity criteria : dir exists & has the required yml file inside it
+    # If valid path, goto that dir
+    VALIDATED_DIR=$(validate_dir "$GL_FILE_PATH")
+    cd "$VALIDATED_DIR" || exit 1
+    echo "Inside the DIR=[$VALIDATED_DIR]"
+
+
+    # invoke parse_dir_and_compose_file & seggregate the dir & file-name
+    # This is needed again, since `validate_dir only`` returns the dir name to goto, not the yml file to run
+    # in start/stop fn, we need to pass the yml file name, this calling parse_dir_and_compose_file again
+    PARSED_DIR_AND_FILE=$(parse_dir_and_compose_file "$GL_FILE_PATH")
+    COMPOSE_FILE_NAME="${PARSED_DIR_AND_FILE#*|}"
+
+
+    # Stop if flag=0
+    if [ "$GL_ACTION" = "0" ]; then
+        stop "$COMPOSE_FILE_NAME"
+        exit 0
+    fi
+
+    # If flag=1, start (in attach/detach mode)
+    if [ -z "$GL_ATTACH_MODE_FLAG" ] || [ "$GL_ATTACH_MODE_FLAG" = "d" ]; then
+        # Start in attach mode (after stopping)
+        stop "$COMPOSE_FILE_NAME"
+        start_detach "$COMPOSE_FILE_NAME"
+    elif [ "$GL_ATTACH_MODE_FLAG" = "a" ]; then
+        # Start in detach mode (after stopping)
+        stop "$COMPOSE_FILE_NAME"
+        start_attach "$COMPOSE_FILE_NAME"
     else
         echo "Invalid value of flag"
     fi
