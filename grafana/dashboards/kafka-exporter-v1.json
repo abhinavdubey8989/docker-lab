@@ -3,7 +3,7 @@
   "kind": "Dashboard",
   "metadata": {
     "name": "jwPKIsniz",
-    "generation": 16,
+    "generation": 21,
     "creationTimestamp": "2026-06-06T05:12:45Z",
     "labels": {},
     "annotations": {}
@@ -28,7 +28,7 @@
       }
     ],
     "cursorSync": "Off",
-    "description": "Kafka resource usage and throughput",
+    "description": "Kafka topic/message level metrics",
     "editable": true,
     "elements": {
       "panel-12": {
@@ -648,7 +648,7 @@
                     "scaleDistribution": {
                       "type": "linear"
                     },
-                    "showPoints": "auto",
+                    "showPoints": "never",
                     "showValues": false,
                     "spanNulls": false,
                     "stacking": {
@@ -772,7 +772,7 @@
                     "scaleDistribution": {
                       "type": "linear"
                     },
-                    "showPoints": "auto",
+                    "showPoints": "never",
                     "showValues": false,
                     "spanNulls": false,
                     "stacking": {
@@ -896,7 +896,7 @@
                     "scaleDistribution": {
                       "type": "linear"
                     },
-                    "showPoints": "auto",
+                    "showPoints": "never",
                     "showValues": false,
                     "spanNulls": false,
                     "stacking": {
@@ -1020,7 +1020,7 @@
                     "scaleDistribution": {
                       "type": "linear"
                     },
-                    "showPoints": "auto",
+                    "showPoints": "never",
                     "showValues": false,
                     "spanNulls": false,
                     "stacking": {
@@ -1165,7 +1165,7 @@
                     "scaleDistribution": {
                       "type": "linear"
                     },
-                    "showPoints": "auto",
+                    "showPoints": "never",
                     "showValues": false,
                     "spanNulls": false,
                     "stacking": {
@@ -1279,6 +1279,127 @@
           }
         }
       },
+      "panel-25": {
+        "kind": "Panel",
+        "spec": {
+          "id": 25,
+          "title": "Under-Replicated Partitions by Topic",
+          "description": "Displays the count of under-replicated partitions aggregated by Kafka cluster and topic. Under-replicated partitions occur when one or more follower replicas fall behind the leader replica. Persistent non-zero values may indicate broker failures, network issues, disk bottlenecks, or replica fetch lag.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum by (server, topic) (\n  kafka_topic_partition_under_replicated_partition{\n    server=~\"$server\",\n    topic=~\"$topic\"\n  }\n)",
+                        "format": "time_series",
+                        "intervalFactor": 1,
+                        "legendFormat": "[{{server}}] - {{topic}}",
+                        "range": true
+                      },
+                      "labels": {
+                        "grafana.app/export-label": "prometheus-1"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "13.1.0-25957875840",
+            "spec": {
+              "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 80,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 20,
+                    "gradientMode": "opacity",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "linear",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "never",
+                    "showValues": false,
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
       "panel-8": {
         "kind": "Panel",
         "spec": {
@@ -1383,7 +1504,7 @@
           {
             "kind": "RowsLayoutRow",
             "spec": {
-              "title": "New row",
+              "title": "Kafka metrics",
               "collapse": false,
               "layout": {
                 "kind": "GridLayout",
@@ -1450,7 +1571,7 @@
                         "height": 8,
                         "element": {
                           "kind": "ElementReference",
-                          "name": "panel-24"
+                          "name": "panel-25"
                         }
                       }
                     },
@@ -1466,6 +1587,19 @@
                           "name": "panel-8"
                         }
                       }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 0,
+                        "y": 29,
+                        "width": 13,
+                        "height": 8,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-24"
+                        }
+                      }
                     }
                   ]
                 }
@@ -1475,8 +1609,8 @@
           {
             "kind": "RowsLayoutRow",
             "spec": {
-              "title": "Kafka-exporter (not the kafka broker) metrics",
-              "collapse": false,
+              "title": "Process_* metrics",
+              "collapse": true,
               "layout": {
                 "kind": "GridLayout",
                 "spec": {
@@ -1580,7 +1714,7 @@
       "hideTimepicker": false,
       "fiscalYearStartMonth": 0
     },
-    "title": "Kafka Exporter Overview",
+    "title": "Kafka Exporter metrics",
     "variables": [
       {
         "kind": "QueryVariable",

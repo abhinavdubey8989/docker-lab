@@ -6,20 +6,19 @@ services:
     container_name: kafka
     restart: "no"
 
-    ports:
-      - "9092:9092"
-      - "9093:9093"
-      - "7071:7071"
+    # Share host network namespace
+    network_mode: host
 
     # Instead of adding lots of `enviroment` here, use dedicated env file
     # The other possible option is : using bind-mount to pass the file from host & `command` argument from docker-compose
     # These variables are injected as environment variables into the container (verify using `echo $CLUSTER_ID` in the container shell)
     env_file:
-      - ./kafka/server.properties
+      - ./kafka/server-host-nw.properties
 
     # configs for container process startup
     # used for : KAFKA_OPTS (JMX exporter), heap size (KAFKA_HEAP_OPTS), debug flags, JVM tuning
     environment:
+      KAFKA_HEAP_OPTS: "-Xms1g -Xmx1g -XX:+UseG1GC"
       KAFKA_OPTS: >-
         -javaagent:/opt/jmx-exporter/jmx_prometheus_javaagent.jar=7071:/opt/jmx-exporter/kafka.yml
 
@@ -32,8 +31,6 @@ services:
 
       # JMX exporter config (passed from host to container)
       - ./kafka/kafka-jmx-exporter.yml:/opt/jmx-exporter/kafka.yml:ro
-    networks:
-      - kfk-network
 
   kafka-exporter:
     image: danielqsj/kafka-exporter:v1.9.0
@@ -44,10 +41,9 @@ services:
     restart: on-failure
     depends_on:
       - kafka
-    ports:
-      - "9308:9308"
+    network_mode: host
     command:
-      - "--kafka.server=kafka:9092"
+      - "--kafka.server=localhost:9092"
 
       # Log errors & warnings only
       - "--verbosity=1"
@@ -57,8 +53,6 @@ services:
 
       # Enable topic metrics
       - "--topic.filter=.*"
-    networks:
-      - kfk-network
 
   schema-registry:
     image: confluentinc/cp-schema-registry:7.6.0
@@ -66,17 +60,11 @@ services:
     restart: "no"
     depends_on:
       - kafka
-    ports:
-      - "8081:8081"
+    network_mode: host
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka:9092
-    networks:
-      - kfk-network
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: localhost:9092
 
 volumes:
   kafka-data:
-
-networks:
-  kfk-network:

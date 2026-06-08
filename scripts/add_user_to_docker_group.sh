@@ -52,6 +52,10 @@ main() {
     docker:x:988:ubuntu
     echo "Listing members of the group docker ..."
     getent group docker
+
+    # Check if docke ps running without sudo
+    echo "run docker ps command without sudo ..."
+    docker ps
 }
 
 
