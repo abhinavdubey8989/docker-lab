@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  alpine:
+    image: alpine:3.22.4
+    container_name: alpine-lab
+    restart: "no"
+
+    # This container can run only CPU core #0 & #1 out of, say 12 cores
+    cpuset: "0-1"
+
+    # Limit RAM to 2 GB
+    # can be verified using `cat /sys/fs/cgroup/memory.max` from the container CLI
+    mem_limit: 2g
+
+    # limits the total number of processes (threads/processes) that can run simultaneously inside the container
+    # This limit applies to all processes, including the main container process (/bin/sh), its children, and any background or zombie processes
+    # Uses the Linux cgroup pids controller, can we verified using : `cat /sys/fs/cgrouppids.max`
+    pids_limit: 50
+
+    volumes:
+      # Pass the scripts dir as read-only bind-mount
+      - ./scripts:/scripts:ro
+
+    command: ["/bin/sh", "/scripts/startup.sh"]
+
+    # Same as `docker run -t`
+    # Allocates a pseudo‑TTY (terminal)
+    # Without it, some interactive commands (like sh, top, or vim) may complain about “not a terminal”
+    # or have broken output (e.g., no colors, messed line editing)
+    tty: true
+
+    # Same as `docker run -i`
+    # Keeps the container’s standard input (STDIN) open, even when not attached
+    # Allows you to send input to the container later (ie. it keeps keyboard input available)
+    # e.g., when you run `docker exec -it alpine-lab sh`, you can type commands interactively
+    stdin_open: true
