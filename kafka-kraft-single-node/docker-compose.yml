@@ -1,0 +1,82 @@
+version: "3.8"
+
+services:
+  kafka:
+    image: apache/kafka:4.3.0
+    container_name: kafka
+    restart: "no"
+
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+      - "7071:7071"
+
+    # Instead of adding lots of `enviroment` here, use dedicated env file
+    # The other possible option is : using bind-mount to pass the file from host & `command` argument from docker-compose
+    # These variables are injected as environment variables into the container (verify using `echo $CLUSTER_ID` in the container shell)
+    env_file:
+      - ./kafka/server.properties
+
+    # configs for container process startup
+    # used for : KAFKA_OPTS (JMX exporter), heap size (KAFKA_HEAP_OPTS), debug flags, JVM tuning
+    environment:
+      KAFKA_OPTS: >-
+        -javaagent:/opt/jmx-exporter/jmx_prometheus_javaagent.jar=7071:/opt/jmx-exporter/kafka.yml
+
+    volumes:
+      # Kafka persistent storage (named volumn)
+      - kafka-data:/var/lib/kafka/data
+
+      # JMX exporter jar (passed from host to container)
+      - ../assets/jmx_prometheus_javaagent-1.5.0.jar:/opt/jmx-exporter/jmx_prometheus_javaagent.jar:ro
+
+      # JMX exporter config (passed from host to container)
+      - ./kafka/kafka-jmx-exporter.yml:/opt/jmx-exporter/kafka.yml:ro
+    networks:
+      - kfk-network
+
+  kafka-exporter:
+    image: danielqsj/kafka-exporter:v1.9.0
+    container_name: kafka-exporter
+
+    # kafka-exporter does not wait till kafka is healthy
+    # so restart this on failure
+    restart: on-failure
+    depends_on:
+      - kafka
+    ports:
+      - "9308:9308"
+    command:
+      - "--kafka.server=kafka:9092"
+
+      # Log errors & warnings only
+      - "--verbosity=1"
+
+      # Enable consumer group metrics
+      - "--group.filter=.*"
+
+      # Enable topic metrics
+      - "--topic.filter=.*"
+    networks:
+      - kfk-network
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.6.0
+    container_name: schema-registry
+    restart: "no"
+    depends_on:
+      - kafka
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka:9092
+    networks:
+      - kfk-network
+
+volumes:
+  kafka-data:
+
+networks:
+  kfk-network:
