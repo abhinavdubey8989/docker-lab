@@ -1,7 +1,6 @@
-version: '3.8'
+version: "3.8"
 
 services:
-
   grafana:
     image: grafana/grafana:main-distroless-slim
     container_name: grafana
@@ -18,4 +17,14 @@ services:
       - GF_USERS_ALLOW_SIGN_UP="false"
 
     volumes:
-      - ./_volume:/var/lib/grafana
+      - grafana-data:/var/lib/grafana
+
+    networks:
+      - monitoring
+
+volumes:
+  grafana-data:
+
+networks:
+  monitoring:
+    external: true

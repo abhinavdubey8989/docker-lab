@@ -1,22 +1,79 @@
-
 global:
   scrape_interval: 5s
   scrape_timeout: 4s
 
-
 scrape_configs:
-
-  - job_name: 'node-exporter'
+  # -----------------------------
+  # Node Exporter (EC2 hosts)
+  # monitor host metrics (CPU, memory, disk, filesystem, network etc.)
+  # -----------------------------
+  - job_name: "node-exporter"
     static_configs:
       - targets:
-          - '98.87.17.102:9100'
+          - "app.server.1:9100"
+        labels:
+          server: "json-serialiser"
 
-  - job_name: 'kafka-jmx'
+      - targets:
+          - "app.server.2:9100"
+        labels:
+          server: "avro-serialiser"
+
+      - targets:
+          - "kafka.server.1:9100"
+        labels:
+          server: "kafka-json"
+
+      - targets:
+          - "app.server.2:9100"
+        labels:
+          server: "kafka-avro"
+
+  # -----------------------------
+  # Kafka JMX Exporter
+  # monitor Kafka-cluster JVM metrics, GC, memory, threads, and internal broker performance (via JMX)
+  # -----------------------------
+  - job_name: "kafka-jmx"
     static_configs:
       - targets:
-          - '98.87.17.102:7071'
+          - "kafka.server.1:7071"
+        labels:
+          server: "kafka-json"
 
-  - job_name: 'kafka-exporter'
+      - targets:
+          - "kafka.server.2:7071"
+        labels:
+          server: "kafka-avro"
+
+  # -----------------------------
+  # Kafka Exporter
+  # monitor Kafka-cluster : Consumer-lag, topic-offsets, partition-level consumption metrics etc.
+  # -----------------------------
+  - job_name: "kafka-exporter"
     static_configs:
       - targets:
-          - '98.87.17.102:9308'
+          - "kafka.server.1:9308"
+        labels:
+          server: "kafka-json"
+
+      - targets:
+          - "kafka.server.2:9308"
+        labels:
+          server: "kafka-avro"
+
+  # -----------------------------
+  # Spring Boot Producer App
+  # monitor application-level metrics like request latency, JVM metrics, custom business metrics, and Prometheus actuator metrics
+  # -----------------------------
+  - job_name: "kafka-producer-app"
+    metrics_path: "/actuator/prometheus"
+    static_configs:
+      - targets:
+          - "app.server.1:9111"
+        labels:
+          server: "json-serialiser"
+
+      - targets:
+          - "app.server.2:9111"
+        labels:
+          server: "avro-serialiser"
