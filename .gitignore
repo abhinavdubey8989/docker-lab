@@ -11,3 +11,7 @@ assets/temp/*
 
 # JAR files
 **/job-jars
+
+
+# Ansible inventory
+**/inventory*.yml
