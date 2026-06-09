@@ -27,7 +27,7 @@ services:
       - kafka-data:/var/lib/kafka/data
 
       # JMX exporter jar (passed from host to container)
-      - ../assets/jmx_prometheus_javaagent-1.5.0.jar:/opt/jmx-exporter/jmx_prometheus_javaagent.jar:ro
+      - ../assets/static/jmx_prometheus_javaagent-1.5.0.jar:/opt/jmx-exporter/jmx_prometheus_javaagent.jar:ro
 
       # JMX exporter config (passed from host to container)
       - ./kafka/kafka-jmx-exporter.yml:/opt/jmx-exporter/kafka.yml:ro
