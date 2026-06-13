@@ -8,6 +8,9 @@ resource "aws_instance" "kafka_nodes" {
   ami           = var.ami_id
   instance_type = var.instance_type
   key_name      = var.key_name
+
+  # aws_instance itself does not have a vpc_id argument
+  # The VPC is inferred from the subnet-id specified
   subnet_id     = var.subnet_id
 
   vpc_security_group_ids = [

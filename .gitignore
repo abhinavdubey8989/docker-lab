@@ -14,4 +14,4 @@ assets/temp/*
 
 
 # Ansible inventory
-**/inventory*.yml
+# **/inventory*.yml

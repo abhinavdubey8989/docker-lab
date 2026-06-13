@@ -7,13 +7,13 @@ variable "aws_region" {
 variable "security_group_id" {
   description = "Existing Security Group ID, to be applied on the created EC2 machines"
   type        = string
-  default     = "sg-00755da9cf22baaa3"
+  default     = "sg-00327297afc95f22b"
 }
 
 variable "ami_id" {
   description = "AMI ID to use for the instance, Ubuntu server 24.04"
   type        = string
-  default     = "ami-05cf1e9f73fbad2e2"
+  default     = "ami-0388e3ada3d9812da"
 }
 
 variable "instance_type" {
@@ -25,13 +25,13 @@ variable "instance_type" {
 variable "key_name" {
   description = "SSH key name for accessing the instance"
   type        = string
-  default     = "ad89-new"
+  default     = "ap-south-keypair-1"
 }
 
 variable "subnet_id" {
   description = "The subnet ID to launch the instance in"
   type        = string
-  default     = "subnet-0d95a854c487bc883"
+  default     = "subnet-05f1339336f3e577c"
 }
 
 variable "kafka_instance_count" {
