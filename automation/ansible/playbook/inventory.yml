@@ -16,3 +16,9 @@ kafka_node:
   vars:
     ansible_user: ubuntu
     ansible_ssh_private_key_file: ~/.ssh/ap-south-keypair-1.pem
+
+
+monitoring:
+  hosts:
+    localhost:
+      ansible_connection: local

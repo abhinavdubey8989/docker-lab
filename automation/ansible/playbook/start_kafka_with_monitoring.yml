@@ -1,0 +1,45 @@
+---
+- name: Start/Stop prometheus node-exporter on inventory hosts
+  hosts: kafka_node
+  become: yes
+
+  vars:
+    repo_path: "/home/ubuntu/docker-lab"
+    script_path: "{{ repo_path }}/scripts/start_stop.sh"
+    compose_target: "kafka-kraft-single-node/docker-compose-host-nw.yml"
+
+    # 0 = stop
+    # 1 = start
+    action: "1"
+
+    # d = detach
+    # a = attach
+    mode: "d"
+
+  tasks:
+    - name: Ensure script is executable
+      file:
+        path: "{{ script_path }}"
+        mode: "0755"
+        state: file
+
+    - name: Execute docker compose start/stop script
+      command: >
+        {{ script_path }}
+        --file={{ compose_target }}
+        --action={{ action }}
+        --mode={{ mode }}
+      args:
+        chdir: "{{ repo_path }}/scripts"
+      become: yes
+      become_user: ubuntu
+      register: script_output
+
+    - name: Display script stdout
+      debug:
+        var: script_output.stdout_lines
+
+    - name: Display script stderr
+      debug:
+        var: script_output.stderr_lines
+      when: script_output.stderr != ""

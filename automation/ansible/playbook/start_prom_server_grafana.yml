@@ -1,0 +1,48 @@
+---
+- name:  Start prometheus-server & grafana for monitoring
+  hosts: monitoring
+  become: yes
+
+  vars:
+    repo_path: "/home/ubuntu/docker-lab"
+    script_path: "{{ repo_path }}/scripts/start_stop.sh"
+    docker_network: "monitoring"
+    services:
+      - prometheus-server
+      - grafana-server
+
+  tasks:
+
+    - name: Ensure script is executable
+      file:
+        path: "{{ script_path }}"
+        mode: "0755"
+
+    # ----------------------------
+    # 1. Create Docker network
+    # ----------------------------
+    - name: Create docker network if not exists
+      command: docker network create {{ docker_network }}
+      register: net_create
+      failed_when: false
+      changed_when: "'already exists' not in net_create.stderr"
+
+    - name: Show network creation output
+      debug:
+        var: net_create.stderr_lines
+
+    # ----------------------------
+    # 2. Start services via script
+    # ----------------------------
+    - name: Start monitoring services
+      command: >
+        {{ script_path }}
+        --file={{ item }}
+        --action=1
+        --mode=d
+      loop: "{{ services }}"
+      register: service_output
+
+    - name: Show service output
+      debug:
+        var: service_output.results
