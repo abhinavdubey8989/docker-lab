@@ -29,6 +29,10 @@ main() {
   echo "Installing AWS CLI..."
   bash "$BASE_DIR/install_aws_cli.sh"
 
+  echo "Installing docker & adding to group..."
+  bash "$BASE_DIR/install_docker.sh.sh"
+  bash "$BASE_DIR/add_user_to_docker_group.sh"
+
   echo "🎉 Control-node setup completed"
 }
 

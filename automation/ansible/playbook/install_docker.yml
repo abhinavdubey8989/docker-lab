@@ -1,6 +1,6 @@
 ---
 - name: Install pinned Docker version on Ubuntu 24
-  hosts: app_server:kafka_node:monitoring
+  hosts: app_server:kafka_node
   become: yes
 
   vars:
