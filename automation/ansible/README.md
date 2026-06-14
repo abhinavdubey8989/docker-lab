@@ -6,20 +6,20 @@ This file lists the steps to use Ansible to configure/deploy applications and ma
 # Ansible Overview
 
 * Ansible is an agentless automation tool used for configuration management, application deployment, and orchestration.
-
 * It connects to target machines using SSH (Linux/Unix) and executes tasks defined in playbooks.
-
 * Unlike Terraform (which is state-driven infrastructure provisioning), Ansible is primarily task-driven and configuration-focused.
 
+Ansible executes in the following order:
+1. Reads `inventory.yml`
+2. Connects to target hosts via SSH
+3. Loads `playbook.yml`
+4. Executes tasks sequentially
+5. Applies changes in an idempotent way (safe to re-run)
 
-# File Structure Behavior
-
+File Structure Behavior
 * Ansible does not require strict filenames, but expects specific file types to work together:
-
 * The main execution unit is a playbook (`*.yml` or `*.yaml`)
-
 * Inventory defines target hosts and groups
-
 * Roles are optional but recommended for modular design
 
 
@@ -37,47 +37,29 @@ roles/              # Reusable automation components (optional)
 
 
 
-# Recommended Project Structure
-
-While not mandatory, this structure is widely used for scalability and clarity:
+# Current Project Structure
 
 ```
-ansible-project-dir/
+automation/ansible/
 │
-├── inventory.yml         # Defines target machines (EC2, servers, etc.)
-├── playbook.yml          # Main execution file
-├── ansible.cfg           # Configurations (optional)
+├── playbook/
+│   ├── inventory.yml
+│   ├── playbooks.yml    # all playbooks are at this level
 │
-├── group_vars/
-│   ├── app_server.yml
-│   ├── kafka_node.yml
-│
-├── host_vars/
-│   ├── machine_1.yml
-│
-└── roles/                # Modular reusable logic (recommended for production)
-    ├── app_deploy/
-    ├── kafka_setup/
 ```
 
 
+# Initialize & Run Ansible from control-node
 
-# Execution Flow in Ansible
 
-Ansible executes in the following order:
-
-1. Reads `inventory.yml`
-2. Connects to target hosts via SSH
-3. Loads `playbook.yml`
-4. Executes tasks sequentially
-5. Applies changes in an idempotent way (safe to re-run)
+## 1. Add the key-pair on the control-node
+- At `~/.ssh` directory on the control-node, add the pem file
+- The pem file name must be same as mentioned in `inventory.yml`
+- This is mandatory & without this the playbooks will not run
 
 
 
-# Initialize & Run Ansible from workstation-node
-
-
-## 1. Verify Ansible installation
+## 2. Verify Ansible installation
 
 ```bash
 ansible --version
@@ -85,7 +67,7 @@ ansible --version
 
 
 
-## 2. Check connectivity to hosts
+## 3. Check connectivity to hosts
 
 ```bash
 ansible all -i inventory.yml -m ping
@@ -95,7 +77,7 @@ This verifies SSH connectivity.
 
 
 
-## 3. Run playbook
+## 4. Run playbook
 
 ```bash
 ansible-playbook -i inventory.yml playbook.yml
@@ -113,12 +95,14 @@ ansible-playbook -i inventory.yml playbook.yml -vvv
 # Fix-3 Preload known hosts
 #   - ssh-keyscan 10.0.1.196 >> ~/.ssh/known_hosts
 # FIX-4 (QUICK): Disable host key checking (common in dev-environment)
+#         NOTE : This is needed when running a playbook 1st time from control-node,
+#                subsequently running any other ansible playbook will not require `ANSIBLE_HOST_KEY_CHECKING=False`
 ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory.yml playbook.yml
 ```
 
 
 
-## 4. Run playbook with specific group
+## 5. Run playbook with specific group
 
 ```bash
 ansible-playbook -i inventory.yml playbook.yml --limit app_server
@@ -131,25 +115,19 @@ ansible-playbook -i inventory.yml playbook.yml --limit kafka_node
 ```
 
 
-## 5. Run playbook for a single host
+## 6. Run playbook for a single host
 
 ```bash
 ansible-playbook -i inventory.yml playbook.yml --limit machine_1
 ```
 
 
-## 6. Dry run (check mode)
+## 7. Dry run (check mode)
 
 ```bash
 ansible-playbook -i inventory.yml playbook.yml --check
 ```
 
-
-## 7. Skip host key verification (dev/lab only)
-
-```bash
-ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory.yml playbook.yml
-```
 
 
 # Key Differences from Terraform

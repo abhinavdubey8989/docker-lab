@@ -6,7 +6,7 @@
   vars:
     repo_url: "https://github.com/abhinavdubey8989/docker-lab.git"
     dest_path: "/home/ubuntu/docker-lab"
-    branch: "main"
+    branch: "feature/automation" # or use "main"
 
   tasks:
     - name: Update apt cache

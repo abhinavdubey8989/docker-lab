@@ -9,7 +9,7 @@
     docker_network: "monitoring"
     services:
       - prometheus-server
-      - grafana-server
+      - grafana
 
   tasks:
 
@@ -40,6 +40,8 @@
         --file={{ item }}
         --action=1
         --mode=d
+      args:
+        chdir: "{{ repo_path }}/scripts"
       loop: "{{ services }}"
       register: service_output
 
