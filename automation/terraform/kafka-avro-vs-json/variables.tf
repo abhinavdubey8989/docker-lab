@@ -37,13 +37,13 @@ variable "subnet_id" {
 variable "kafka_instance_count" {
   description = "Number of EC2 instances to create for running kafka"
   type        = number
-  default     = 1
+  default     = 2
 }
 
 variable "app_instance_count" {
   description = "Number of EC2 instances to create for running application"
   type        = number
-  default     = 1
+  default     = 2
 }
 
 # variable "allowed_ssh_cidr" {

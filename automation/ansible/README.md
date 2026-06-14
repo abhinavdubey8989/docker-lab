@@ -56,7 +56,11 @@ automation/ansible/
 - At `~/.ssh` directory on the control-node, add the pem file
 - The pem file name must be same as mentioned in `inventory.yml`
 - This is mandatory & without this the playbooks will not run
+- Also, need to change the permission of this pem file
 
+````bash
+cd ~/.ssh && chmod 400 *.pem
+````
 
 
 ## 2. Verify Ansible installation

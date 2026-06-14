@@ -1,0 +1,20 @@
+---
+- name: Append entries to /etc/hosts on prometheuse-server node
+  hosts: monitoring
+  become: true
+
+  vars:
+    hosts_entries:
+      - "10.0.1.219 app.server.1" # json app-node
+      - "10.0.1.216 app.server.2" # avro app-node
+      - "10.0.1.125 kafka.server.1" # json kafka-node
+      - "10.0.1.168 kafka.server.2" # avro kafka-node
+
+  tasks:
+    - name: Add entries to /etc/hosts safely
+      lineinfile:
+        path: /etc/hosts
+        line: "{{ item }}"
+        state: present
+        create: yes
+      loop: "{{ hosts_entries }}"

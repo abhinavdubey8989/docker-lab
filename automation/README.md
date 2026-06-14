@@ -4,7 +4,7 @@ This readme lists down steps for setting up the node from where we would run Ans
 
 
 ## Steps for setting up the cordinator EC2 node
-- Create an EC2 machine (1GB memory, 2 vCPU is fine)
+- Create an EC2 machine (t2.medium : 4GB memory, 2 vCPU is fine)
 
 - On this machine, install : `ansible`, `terraform`, `aws-cli`
     - The scripts to install these are present in `scripts` dir

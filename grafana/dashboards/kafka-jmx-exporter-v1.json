@@ -3,8 +3,8 @@
   "kind": "Dashboard",
   "metadata": {
     "name": "i8HLvrkiz",
-    "generation": 24,
-    "creationTimestamp": "2026-06-06T07:31:29Z",
+    "generation": 5,
+    "creationTimestamp": "2026-06-14T10:02:04Z",
     "labels": {},
     "annotations": {}
   },
@@ -22,9 +22,6 @@
               "matchAny": false,
               "tags": [],
               "type": "dashboard"
-            },
-            "labels": {
-              "grafana.app/export-label": "grafana-1"
             }
           },
           "enable": true,
@@ -2501,7 +2498,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by(server) (rate(kafka_server_brokertopicmetrics_count{name=\"TotalProduceRequestsPerSec\",server=~\"$server\",topic=~\"$topic\"}[5m]))",
+                        "expr": "sum by (server) (\n  rate(\n    kafka_server_brokertopicmetrics_count{\n      name=\"TotalProduceRequestsPerSec\",\n      server=~\"$server\",\n      topic=~\"$topic\",\n      topic!~\"(__consumer_offsets|_schemas)\"\n    }[5m]\n  )\n)",
                         "legendFormat": "{{server}}",
                         "range": true
                       },
@@ -2628,7 +2625,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by(server) (rate(kafka_server_brokertopicmetrics_count{name=\"TotalFetchRequestsPerSec\",server=~\"$server\",topic=~\"$topic\"}[5m]))",
+                        "expr": "sum by (server) (\n  rate(\n    kafka_server_brokertopicmetrics_count{\n      name=\"TotalFetchRequestsPerSec\",\n      server=~\"$server\",\n      topic=~\"$topic\",\n      topic!~\"(__consumer_offsets|_schemas)\"\n    }[5m]\n  )\n)",
                         "legendFormat": "{{server}}",
                         "range": true
                       },
@@ -3115,6 +3112,133 @@
             }
           }
         }
+      },
+      "panel-86": {
+        "kind": "Panel",
+        "spec": {
+          "id": 86,
+          "title": "Average Records per Produce Request",
+          "description": "Shows the average number of Kafka records contained in each ProduceRequest received by the broker.\n\nCalculated as:\n\nMessagesInPerSec ÷ TotalProduceRequestsPerSec\n\nHigher values indicate more efficient batching, where each ProduceRequest carries more records. Lower values indicate smaller batches and a higher ProduceRequest rate for the same message throughput.\n\nThis metric is useful for comparing producer batching behavior (for example, JSON vs AVRO serialization) while normalizing for differences in message throughput.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum by(server) (\n  rate(\n    kafka_server_brokertopicmetrics_count{\n      name=\"MessagesInPerSec\",\n      server=~\"$server\",\n      topic=~\"$topic\",\n      topic!~\"(__consumer_offsets|_schemas)\"\n    }[5m]\n  )\n)\n/\nsum by(server) (\n  rate(\n    kafka_server_brokertopicmetrics_count{\n      name=\"TotalProduceRequestsPerSec\",\n      server=~\"$server\",\n      topic=~\"$topic\",\n      topic!~\"(__consumer_offsets|_schemas)\"\n    }[5m]\n  )\n)",
+                        "legendFormat": "{{server}}",
+                        "range": true
+                      },
+                      "labels": {
+                        "grafana.app/export-label": "prometheus-1"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "13.1.0-25957875840",
+            "spec": {
+              "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "calcs": [
+                    "min",
+                    "max",
+                    "mean",
+                    "last"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 80,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 20,
+                    "gradientMode": "opacity",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "linear",
+                    "lineStyle": {
+                      "fill": "solid"
+                    },
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "never",
+                    "showValues": false,
+                    "spanNulls": true,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
       }
     },
     "layout": {
@@ -3298,15 +3422,16 @@
               "title": "Network metrics",
               "collapse": false,
               "layout": {
-                "kind": "AutoGridLayout",
+                "kind": "GridLayout",
                 "spec": {
-                  "maxColumnCount": 2,
-                  "columnWidthMode": "standard",
-                  "rowHeightMode": "standard",
                   "items": [
                     {
-                      "kind": "AutoGridLayoutItem",
+                      "kind": "GridLayoutItem",
                       "spec": {
+                        "x": 0,
+                        "y": 0,
+                        "width": 12,
+                        "height": 9,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-74"
@@ -3314,8 +3439,12 @@
                       }
                     },
                     {
-                      "kind": "AutoGridLayoutItem",
+                      "kind": "GridLayoutItem",
                       "spec": {
+                        "x": 12,
+                        "y": 0,
+                        "width": 12,
+                        "height": 9,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-79"
@@ -3323,8 +3452,12 @@
                       }
                     },
                     {
-                      "kind": "AutoGridLayoutItem",
+                      "kind": "GridLayoutItem",
                       "spec": {
+                        "x": 0,
+                        "y": 9,
+                        "width": 12,
+                        "height": 9,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-80"
@@ -3332,8 +3465,12 @@
                       }
                     },
                     {
-                      "kind": "AutoGridLayoutItem",
+                      "kind": "GridLayoutItem",
                       "spec": {
+                        "x": 12,
+                        "y": 9,
+                        "width": 12,
+                        "height": 9,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-84"
@@ -3341,8 +3478,25 @@
                       }
                     },
                     {
-                      "kind": "AutoGridLayoutItem",
+                      "kind": "GridLayoutItem",
                       "spec": {
+                        "x": 0,
+                        "y": 18,
+                        "width": 24,
+                        "height": 9,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-86"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 0,
+                        "y": 27,
+                        "width": 12,
+                        "height": 9,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-81"
@@ -3350,8 +3504,12 @@
                       }
                     },
                     {
-                      "kind": "AutoGridLayoutItem",
+                      "kind": "GridLayoutItem",
                       "spec": {
+                        "x": 12,
+                        "y": 27,
+                        "width": 12,
+                        "height": 9,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-82"
@@ -3359,8 +3517,12 @@
                       }
                     },
                     {
-                      "kind": "AutoGridLayoutItem",
+                      "kind": "GridLayoutItem",
                       "spec": {
+                        "x": 0,
+                        "y": 36,
+                        "width": 12,
+                        "height": 9,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-83"
@@ -3368,8 +3530,12 @@
                       }
                     },
                     {
-                      "kind": "AutoGridLayoutItem",
+                      "kind": "GridLayoutItem",
                       "spec": {
+                        "x": 12,
+                        "y": 36,
+                        "width": 12,
+                        "height": 9,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-85"
@@ -3385,7 +3551,7 @@
             "kind": "RowsLayoutRow",
             "spec": {
               "title": "GC metrics",
-              "collapse": false,
+              "collapse": true,
               "layout": {
                 "kind": "AutoGridLayout",
                 "spec": {
@@ -3445,10 +3611,11 @@
     ],
     "timeSettings": {
       "timezone": "browser",
-      "from": "now-12h",
+      "from": "now-1h",
       "to": "now",
-      "autoRefresh": "",
+      "autoRefresh": "10s",
       "autoRefreshIntervals": [
+        "5s",
         "10s",
         "30s",
         "1m",

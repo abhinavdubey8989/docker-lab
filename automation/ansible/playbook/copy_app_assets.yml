@@ -1,10 +1,9 @@
 ---
-- name: Copy properties file to target hosts
+- name: Copy Spring-app properties file per app-server
   hosts: app_server
   become: true
 
   vars:
-    src_file: ../assets/data-weave-application-docker.properties
     dest_dir: /home/ubuntu/data-weave/web/src/main/resources
 
   tasks:
@@ -14,8 +13,16 @@
         state: directory
         mode: "0755"
 
-    - name: Copy properties file from assets folder
+    - name: Copy for JSON app-node
       copy:
-        src: "{{ src_file }}"
+        src: ../assets/dw-json-application-docker.properties
         dest: "{{ dest_dir }}/application-docker.properties"
         mode: "0644"
+      when: inventory_hostname == "app_server_1"
+
+    - name: Copy for AVRO app-node
+      copy:
+        src: ../assets/dw-avro-application-docker.properties
+        dest: "{{ dest_dir }}/application-docker.properties"
+        mode: "0644"
+      when: inventory_hostname == "app_server_2"

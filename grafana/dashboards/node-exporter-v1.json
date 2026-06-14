@@ -3,8 +3,8 @@
   "kind": "Dashboard",
   "metadata": {
     "name": "admptfl",
-    "generation": 13,
-    "creationTimestamp": "2026-06-07T10:28:07Z",
+    "generation": 2,
+    "creationTimestamp": "2026-06-14T10:02:48Z",
     "labels": {},
     "annotations": {}
   },
@@ -500,7 +500,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "node_memory_SUnreclaim_bytes{server=~\"$server\",job=\"$job\"}",
+                        "expr": "node_memory_SUnreclaim_bytes{server=~\"$server\"}",
                         "format": "time_series",
                         "legendFormat": "[{{server}}] SUnreclaim – Non-reclaimable slab memory (kernel objects)",
                         "range": true,
@@ -523,7 +523,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "node_memory_SReclaimable_bytes{server=~\"$server\",job=\"$job\"}",
+                        "expr": "node_memory_SReclaimable_bytes{server=~\"$server\"}",
                         "format": "time_series",
                         "legendFormat": "[{{server}}] SReclaimable – Potentially reclaimable slab memory (e.g., inode cache)",
                         "range": true,
@@ -2327,7 +2327,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "rate(node_vmstat_pgfault{server=~\"$server\",job=\"$job\"}[$__rate_interval])",
+                        "expr": "rate(node_vmstat_pgfault{server=~\"$server\"}[$__rate_interval])",
                         "format": "time_series",
                         "legendFormat": "[{{server}}] Pgfault - Page major and minor fault ops",
                         "range": true,
@@ -2350,7 +2350,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "rate(node_vmstat_pgmajfault{server=~\"$server\",job=\"$job\"}[$__rate_interval])",
+                        "expr": "rate(node_vmstat_pgmajfault{server=~\"$server\"}[$__rate_interval])",
                         "format": "time_series",
                         "legendFormat": "[{{server}}] Pgmajfault - Major page fault ops",
                         "range": true,
@@ -2373,7 +2373,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "rate(node_vmstat_pgfault{server=~\"$server\",job=\"$job\"}[$__rate_interval])  - rate(node_vmstat_pgmajfault{server=~\"$server\",job=\"$job\"}[$__rate_interval])",
+                        "expr": "rate(node_vmstat_pgfault{server=~\"$server\"}[$__rate_interval])  - rate(node_vmstat_pgmajfault{server=~\"$server\"}[$__rate_interval])",
                         "format": "time_series",
                         "legendFormat": "[{{server}}] Pgminfault - Minor page fault ops",
                         "range": true,
@@ -2534,7 +2534,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "rate(node_vmstat_pgpgin{server=~\"$server\",job=\"$job\"}[$__rate_interval])",
+                        "expr": "rate(node_vmstat_pgpgin{server=~\"$server\"}[$__rate_interval])",
                         "format": "time_series",
                         "legendFormat": "[{{server}}]  Pagesin - Page in ops",
                         "range": true,
@@ -2557,7 +2557,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "rate(node_vmstat_pgpgout{server=~\"$server\",job=\"$job\"}[$__rate_interval])",
+                        "expr": "rate(node_vmstat_pgpgout{server=~\"$server\"}[$__rate_interval])",
                         "format": "time_series",
                         "legendFormat": "[{{server}}] Pagesout - Page out ops",
                         "range": true,
@@ -3592,30 +3592,6 @@
                         }
                       }
                     ]
-                  },
-                  {
-                    "__systemRef": "hideSeriesFrom",
-                    "matcher": {
-                      "id": "byNames",
-                      "options": {
-                        "mode": "exclude",
-                        "names": [
-                          "[json-serialiser] FD: allocated"
-                        ],
-                        "prefix": "All except:",
-                        "readOnly": true
-                      }
-                    },
-                    "properties": [
-                      {
-                        "id": "custom.hideFrom",
-                        "value": {
-                          "legend": false,
-                          "tooltip": true,
-                          "viz": true
-                        }
-                      }
-                    ]
                   }
                 ]
               }
@@ -3864,7 +3840,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "rate(node_cpu_seconds_total{mode=~\"user|system\"}[5m])",
+                        "expr": "rate(node_cpu_seconds_total{server=~\"$server\",mode=~\"user|system\"}[5m])",
                         "format": "time_series",
                         "interval": "",
                         "legendFormat": "[{{server}}] - {{mode}}",
@@ -4180,7 +4156,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "rate(node_vmstat_oom_kill{server=~\"$server\",job=\"$job\"}[$__rate_interval])",
+                        "expr": "rate(node_vmstat_oom_kill{server=~\"$server\"}[$__rate_interval])",
                         "format": "time_series",
                         "interval": "",
                         "legendFormat": "[{{server}}] OOM Kills",
@@ -6702,7 +6678,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "rate(node_cpu_seconds_total{mode!~\"user|system\"}[5m])",
+                        "expr": "rate(node_cpu_seconds_total{server=~\"$server\",mode!~\"user|system\"}[5m])",
                         "format": "time_series",
                         "interval": "",
                         "legendFormat": "[{{server}}] - {{mode}}",
@@ -6726,7 +6702,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "(\n  sum by (server) (rate(node_cpu_seconds_total{mode=\"user\", server=~\"$server\", job=\"$job\"}[$__rate_interval]))\n  /\n  count by (server) (count(node_cpu_seconds_total{server=~\"$server\", job=\"$job\", mode=\"idle\"}) by (server, cpu))\n) * 100",
+                        "expr": "(\n  sum by (server) (rate(node_cpu_seconds_total{server=~\"$server\",mode=\"user\"}[$__rate_interval]))\n  /\n  count by (server) (count(node_cpu_seconds_total{server=~\"$server\", mode=\"idle\"}) by (server, cpu))\n) * 100",
                         "format": "time_series",
                         "legendFormat": "[{{server}}] User - Normal processes executing in user mode",
                         "range": true,
@@ -8908,7 +8884,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "rate(node_intr_total{server=~\"$server\",job=\"$job\"}[$__rate_interval])",
+                        "expr": "rate(node_intr_total{server=~\"$server\"}[$__rate_interval])",
                         "format": "time_series",
                         "legendFormat": "[{{server}}] Interrupts",
                         "range": true,
@@ -9353,7 +9329,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "rate(node_disk_writes_completed_total{server=~\"$server\",job=\"$job\"}[$__rate_interval])",
+                        "expr": "rate(node_disk_writes_completed_total{server=~\"$server\"}[$__rate_interval])",
                         "legendFormat": "[{{server}}] {{device}} - Write",
                         "range": true,
                         "step": 240
@@ -9617,7 +9593,7 @@
             "kind": "RowsLayoutRow",
             "spec": {
               "title": "CPU",
-              "collapse": false,
+              "collapse": true,
               "layout": {
                 "kind": "GridLayout",
                 "spec": {
@@ -9696,7 +9672,7 @@
             "kind": "RowsLayoutRow",
             "spec": {
               "title": "Processes",
-              "collapse": false,
+              "collapse": true,
               "layout": {
                 "kind": "GridLayout",
                 "spec": {
@@ -10396,9 +10372,9 @@
     "tags": [],
     "timeSettings": {
       "timezone": "browser",
-      "from": "now-15m",
+      "from": "now-1h",
       "to": "now",
-      "autoRefresh": "1m",
+      "autoRefresh": "10s",
       "autoRefreshIntervals": [
         "5s",
         "10s",
