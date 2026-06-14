@@ -4,11 +4,11 @@
 # [Aim]
 # This script will start/stop the docker-compose components in a given dir in attach/detach mode
 #
-# 
+#
 # [Assumption]
 # - Docker is installed
 #
-# 
+#
 # [Arguments]
 # --file=<dir_name>
 #     Uses <dir_name>/docker-compose.yml
@@ -17,27 +17,39 @@
 #     Uses the specified compose file
 #
 # --action=<0|1>
-#     0 -> stop
-#     1 -> start
+#     [0] -> stop
+#     [1] -> start
 #
 # --mode=<a|d>
-#     a -> attach mode
-#     d -> detach mode (default)
+#     [a] -> attach mode
+#     [d] -> detach mode (default)
 #
-# 
+# --volume-clear=true
+#        [true]              -> remove compose-managed volumes of current docker-compose only
+#        [any-other-value] -> preserve compose-managed volumes (default)
+#
+# --prune-dangling-volumes=true
+#        [true]              -> run `docker volume prune` to remove dangling volums
+#        [any-other-value]   -> not run `docker volume prune`
+#
+#
+#
 # [Examples]
-# 
+#
+#
 # Starting file named : docker-compose.yml
-# ./start_stop.sh --file=prometheus-server --action=1
 # ./start_stop.sh --file=prometheus-server --action=1 --mode=a
+# ./start_stop.sh --file=prometheus-server --action=1 --mode=d
+#
 #
 # Starting a custom yml file (here, `d1.yml`)
 # ./start_stop.sh --file=prometheus-server/d1.yml --action=1
 # ./start_stop.sh --file=prometheus-server/d1.yml --action=1 --mode=a
 #
-# Stopping
-# ./start_stop.sh --file=prometheus-server --action=0
-# ./start_stop.sh --file=prometheus-server/d1.yml --action=0
+#
+# Stopping (--mode is not needed for stopping)
+# ./start_stop.sh --file=prometheus-server --action=0 --volume-clear=true
+# ./start_stop.sh --file=prometheus-server/d1.yml --action=0 --prune-dangling-volumes=true
 #
 # ============================================================================
 
@@ -45,8 +57,24 @@
 # Util fn to stop docker-compose
 stop() {
     COMPOSE_FILE=$1
-    docker compose -f "$COMPOSE_FILE" down
+
+    if [ "$GL_VOLUME_CLEAR" = "true" ]; then
+        echo "Stopping and removing compose volumes..."
+        docker compose -f "$COMPOSE_FILE" down -v
+    else
+        echo "Stopping and keeping compose volumes..."
+        docker compose -f "$COMPOSE_FILE" down
+    fi
+
     docker container prune -f
+
+    if [ "$GL_PRUNE_DANGLING_VOLUMES" = "true" ]; then
+        echo "Pruning dangling docker-volumes..."
+        docker volume prune -f
+    else
+        echo "Skipping dangling docker volumes prune operation..."
+    fi
+
     echo "stopped $PWD/$COMPOSE_FILE ..."
 }
 
@@ -172,6 +200,12 @@ parse_args() {
                 ;;
             --mode=*)
                 GL_ATTACH_MODE_FLAG="${arg#*=}"
+                ;;
+            --volume-clear=*)
+                GL_VOLUME_CLEAR="${arg#*=}"
+                ;;
+            --prune-dangling-volumes=*)
+                GL_PRUNE_DANGLING_VOLUMES="${arg#*=}"
                 ;;
             *)
                 echo "Unknown argument: $arg"

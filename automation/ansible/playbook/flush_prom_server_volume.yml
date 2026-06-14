@@ -1,0 +1,27 @@
+---
+- name: Reset Prometheus TSDB and restart Prometheus
+  hosts: monitoring
+  become: yes
+
+  vars:
+    repo_path: "/home/ubuntu/docker-lab"
+    script_path: "{{ repo_path }}/scripts/start_stop.sh"
+    prometheus_compose: "prometheus-server"
+
+  tasks:
+    - name: Reset Prometheus volumes and restart Prometheus
+      command: >
+        {{ script_path }}
+        --file={{ prometheus_compose }}
+        --action=1
+        --mode=d
+        --volume-clear=true
+        --prune-dangling-volumes=true
+      args:
+        chdir: "{{ repo_path }}/scripts"
+      become_user: ubuntu
+      register: prom_output
+
+    - name: Show Prometheus reset output
+      debug:
+        var: prom_output.stdout_lines
