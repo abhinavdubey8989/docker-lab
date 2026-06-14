@@ -1,6 +1,11 @@
 ---
-- import_playbook: clone_repo.yml
+- import_playbook: clone_current_repo.yml
+- import_playbook: clone_app_repo.yml
+- import_playbook: copy_app_assets.yml
+
 - import_playbook: install_docker.yml
 - import_playbook: start_node_exporter.yml
 - import_playbook: start_kafka_with_monitoring.yml
+- import_playbook: start_app_container.yml
+
 - import_playbook: start_prom_server_grafana.yml

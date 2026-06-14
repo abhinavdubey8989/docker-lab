@@ -1,5 +1,5 @@
 ---
-- name: Clone GitHub repository to target nodes
+- name: Clone docker-lab GitHub repository to target nodes
   hosts: app_server:kafka_node
   become: yes
 

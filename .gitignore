@@ -15,3 +15,6 @@ assets/temp/*
 
 # Ansible inventory
 # **/inventory*.yml
+
+# Ansible assets
+automation/ansible/assets/data-weave-application-docker.properties

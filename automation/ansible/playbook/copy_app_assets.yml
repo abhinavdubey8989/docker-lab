@@ -1,0 +1,21 @@
+---
+- name: Copy properties file to target hosts
+  hosts: app_server
+  become: true
+
+  vars:
+    src_file: ../assets/data-weave-application-docker.properties
+    dest_dir: /home/ubuntu/data-weave/web/src/main/resources
+
+  tasks:
+    - name: Ensure destination directory exists
+      file:
+        path: "{{ dest_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Copy properties file from assets folder
+      copy:
+        src: "{{ src_file }}"
+        dest: "{{ dest_dir }}/application-docker.properties"
+        mode: "0644"
