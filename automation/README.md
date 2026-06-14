@@ -7,7 +7,7 @@ This readme lists down steps for setting up the node from where we would run Ans
 - Create an EC2 machine (t2.medium : 4GB memory, 2 vCPU is fine)
 
 - On this machine, install : `ansible`, `terraform`, `aws-cli`
-    - The scripts to install these are present in `scripts` dir
+    - The script to install required dependencies on control-node : `setup_control_node.sh`
     - These scripts assume underlying OS version is ubuntu 24.04 LTS
 
 - Create IAM user & add this user to appropriate group

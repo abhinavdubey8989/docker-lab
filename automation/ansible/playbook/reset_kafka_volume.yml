@@ -1,0 +1,38 @@
+---
+- name: Start/Stop prometheus node-exporter on inventory hosts
+  hosts: kafka_node
+  become: yes
+
+  vars:
+    repo_path: "/home/ubuntu/docker-lab"
+    script_path: "{{ repo_path }}/scripts/start_stop.sh"
+    compose_target: "kafka-kraft-single-node/docker-compose-host-nw.yml"
+
+    # Kafka volumne
+    kafka_volume: "kafka-kraft-single-node_kafka-data"
+
+  tasks:
+    - name: Stop kafka
+      command: >
+        {{ script_path }}
+        --file={{ compose_target }}
+        --action=0
+      args:
+        chdir: "{{ repo_path }}/scripts"
+      become: yes
+      become_user: ubuntu
+      register: script_output
+
+    - name: Show stop output
+      debug:
+        var: stop_output.stdout_lines
+
+    - name: Remove Kafka data volume
+      command: docker volume rm {{ kafka_volume }}
+      register: vol_rm
+      failed_when: false
+      changed_when: "'No such volume' not in vol_rm.stderr"
+
+    - name: Show volume deletion output
+      debug:
+        var: vol_rm.stderr_lines

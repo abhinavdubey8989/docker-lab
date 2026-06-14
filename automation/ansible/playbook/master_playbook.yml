@@ -1,17 +1,21 @@
 ---
+# Before running any playbook, adjust the ansible inventory.yml
+
 - import_playbook: clone_current_repo.yml
 - import_playbook: clone_app_repo.yml
-- import_playbook: update_etc_hosts_prom_server.yml
-- import_playbook: copy_app_assets.yml
 
+# Before update_etc_hosts_prom_server.yml, adjust the hosts_entries vars in this playbook
+- import_playbook: update_etc_hosts_prom_server.yml
+
+# Before copy_app_assets.yml, adjust the bootstrap-servers config on the control node
+- import_playbook: copy_app_assets.yml
 - import_playbook: install_docker.yml
 - import_playbook: start_node_exporter.yml
 
 
-# Before starting kafka, adjust the advertised-listener config
+# Before start_kafka_with_monitoring.yml, adjust the advertised-listener config on the kafka broker node
 - import_playbook: start_kafka_with_monitoring.yml
 - import_playbook: start_app_container.yml
-
 - import_playbook: start_prom_server_grafana.yml
 
 # After this step, need to call the API to start the kafka msg production

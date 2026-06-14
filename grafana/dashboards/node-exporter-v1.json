@@ -3,8 +3,8 @@
   "kind": "Dashboard",
   "metadata": {
     "name": "admptfl",
-    "generation": 2,
-    "creationTimestamp": "2026-06-14T10:02:48Z",
+    "generation": 3,
+    "creationTimestamp": "2026-06-14T14:15:11Z",
     "labels": {},
     "annotations": {}
   },
@@ -3840,7 +3840,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "rate(node_cpu_seconds_total{server=~\"$server\",mode=~\"user|system\"}[5m])",
+                        "expr": "sum by (server, mode) (\n  rate(node_cpu_seconds_total{server=~\"$server\", mode=~\"user|system\"}[5m])\n)",
                         "format": "time_series",
                         "interval": "",
                         "legendFormat": "[{{server}}] - {{mode}}",
@@ -6678,7 +6678,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "rate(node_cpu_seconds_total{server=~\"$server\",mode!~\"user|system\"}[5m])",
+                        "expr": "sum by (server, mode) (\n  rate(node_cpu_seconds_total{server=~\"$server\", mode!~\"user|system\"}[5m])\n)",
                         "format": "time_series",
                         "interval": "",
                         "legendFormat": "[{{server}}] - {{mode}}",
@@ -9593,7 +9593,7 @@
             "kind": "RowsLayoutRow",
             "spec": {
               "title": "CPU",
-              "collapse": true,
+              "collapse": false,
               "layout": {
                 "kind": "GridLayout",
                 "spec": {
