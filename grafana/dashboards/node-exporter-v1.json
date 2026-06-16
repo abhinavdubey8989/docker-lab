@@ -3,8 +3,8 @@
   "kind": "Dashboard",
   "metadata": {
     "name": "admptfl",
-    "generation": 3,
-    "creationTimestamp": "2026-06-14T14:15:11Z",
+    "generation": 6,
+    "creationTimestamp": "2026-06-16T14:42:13Z",
     "labels": {},
     "annotations": {}
   },
@@ -289,7 +289,7 @@
         "kind": "Panel",
         "spec": {
           "id": 130,
-          "title": "Memory Writeback and Dirty",
+          "title": "Memory Writeback and Dirty*",
           "description": "Memory currently dirty (modified but not yet written to disk), being actively written back, or held by writeback buffers. High dirty or writeback memory may indicate disk I/O pressure or delayed flushing",
           "links": [],
           "data": {
@@ -316,7 +316,7 @@
                       }
                     },
                     "refId": "A",
-                    "hidden": false
+                    "hidden": true
                   }
                 },
                 {
@@ -339,7 +339,7 @@
                       }
                     },
                     "refId": "B",
-                    "hidden": false
+                    "hidden": true
                   }
                 },
                 {
@@ -385,7 +385,7 @@
                       }
                     },
                     "refId": "D",
-                    "hidden": false
+                    "hidden": true
                   }
                 }
               ],
@@ -1025,7 +1025,7 @@
         "kind": "Panel",
         "spec": {
           "id": 148,
-          "title": "Processes Forks",
+          "title": "Processes Forks*",
           "description": "Rate of new processes being created on the system (forks/sec).",
           "links": [],
           "data": {
@@ -1803,7 +1803,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "node_filesystem_size_bytes{server=~\"$server\",job=\"$job\",device!~'rootfs'} - node_filesystem_avail_bytes{server=~\"$server\",job=\"$job\",device!~'rootfs'}",
+                        "expr": "node_filesystem_size_bytes{server=~\"$server\",job=\"$job\",device!~'rootfs',mountpoint=\"/\"} - node_filesystem_avail_bytes{server=~\"$server\",job=\"$job\",device!~'rootfs',mountpoint=\"/\"}",
                         "format": "time_series",
                         "legendFormat": "[{{server}}] {{mountpoint}}",
                         "range": true,
@@ -2358,7 +2358,7 @@
                       }
                     },
                     "refId": "B",
-                    "hidden": false
+                    "hidden": true
                   }
                 },
                 {
@@ -2381,7 +2381,7 @@
                       }
                     },
                     "refId": "C",
-                    "hidden": false
+                    "hidden": true
                   }
                 }
               ],
@@ -3454,7 +3454,7 @@
                       }
                     },
                     "refId": "A",
-                    "hidden": false
+                    "hidden": true
                   }
                 },
                 {
@@ -3840,7 +3840,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (server, mode) (\n  rate(node_cpu_seconds_total{server=~\"$server\", mode=~\"user|system\"}[5m])\n)",
+                        "expr": "sum by (server, mode) (\n  rate(node_cpu_seconds_total{server=~\"$server\", mode=\"user\"}[5m])\n)",
                         "format": "time_series",
                         "interval": "",
                         "legendFormat": "[{{server}}] - {{mode}}",
@@ -3947,7 +3947,7 @@
         "kind": "Panel",
         "spec": {
           "id": 305,
-          "title": "CPU Saturation per Core (CPU time spent running a process)",
+          "title": "CPU Saturation*",
           "description": "Shows CPU saturation per core, calculated as the proportion of time spent waiting to run relative to total time demanded (running + waiting).",
           "links": [],
           "data": {
@@ -3967,7 +3967,7 @@
                       "spec": {
                         "editorMode": "code",
                         "exemplar": false,
-                        "expr": "rate(node_schedstat_running_seconds_total{server=~\"$server\"}[$__rate_interval])",
+                        "expr": "avg by (server) (\n  rate(node_schedstat_running_seconds_total{server=~\"$server\"}[$__rate_interval])\n)",
                         "format": "time_series",
                         "instant": false,
                         "interval": "",
@@ -3992,7 +3992,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "rate(node_schedstat_waiting_seconds_total{server=~\"$server\"}[$__rate_interval])",
+                        "expr": "avg by (server) (\n  rate(node_schedstat_waiting_seconds_total{server=~\"$server\"}[$__rate_interval])\n)",
                         "format": "time_series",
                         "interval": "",
                         "legendFormat": "[{{server}}] CPU {{cpu}} - Waiting Queue",
@@ -4001,7 +4001,7 @@
                       }
                     },
                     "refId": "B",
-                    "hidden": false
+                    "hidden": true
                   }
                 },
                 {
@@ -4016,7 +4016,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "((rate(node_schedstat_running_seconds_total{server=~\"$server\"}[$__rate_interval]) + rate(node_schedstat_waiting_seconds_total{server=~\"$server\"}[$__rate_interval])) > bool 0) * (rate(node_schedstat_waiting_seconds_total{server=~\"$server\"}[$__rate_interval]) / (rate(node_schedstat_running_seconds_total{server=~\"$server\"}[$__rate_interval]) + rate(node_schedstat_waiting_seconds_total{server=~\"$server\"}[$__rate_interval])))",
+                        "expr": "avg by (server) (\n  ((rate(node_schedstat_running_seconds_total{server=~\"$server\"}[$__rate_interval]) \n    + rate(node_schedstat_waiting_seconds_total{server=~\"$server\"}[$__rate_interval])) > bool 0) \n  * \n  (rate(node_schedstat_waiting_seconds_total{server=~\"$server\"}[$__rate_interval]) \n    / \n    (rate(node_schedstat_running_seconds_total{server=~\"$server\"}[$__rate_interval]) \n     + rate(node_schedstat_waiting_seconds_total{server=~\"$server\"}[$__rate_interval])))\n)",
                         "format": "time_series",
                         "interval": "",
                         "legendFormat": "[{{server}}] CPU {{cpu}}",
@@ -4025,7 +4025,7 @@
                       }
                     },
                     "refId": "C",
-                    "hidden": false
+                    "hidden": true
                   }
                 }
               ],
@@ -5030,7 +5030,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "rate(node_network_transmit_bytes_total{server=~\"$server\",job=\"$job\"}[$__rate_interval])*8",
+                        "expr": "rate(node_network_transmit_bytes_total{server=~\"$server\",job=\"$job\",device=\"enX0\"}[$__rate_interval])*8",
                         "format": "time_series",
                         "legendFormat": "[{{server}}] {{device}} - Tx out",
                         "range": true,
@@ -5256,8 +5256,8 @@
         "kind": "Panel",
         "spec": {
           "id": 342,
-          "title": "Memory pages put",
-          "description": "Rate of memory pages being read from or written to disk (page-in and page-out operations). High page-out may indicate memory pressure or swapping activity",
+          "title": "Memory pages out*",
+          "description": "Rate of memory pages written to disk (page-out). High page-out may indicate memory pressure or swapping activity",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -5378,7 +5378,7 @@
         "kind": "Panel",
         "spec": {
           "id": 343,
-          "title": "Filesystem Used %",
+          "title": "Filesystem Used % *",
           "description": "Disk usage (used = total - available) per mountpoint in %",
           "links": [],
           "data": {
@@ -5397,7 +5397,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "(node_filesystem_size_bytes{server=~\"$server\",device!~'rootfs'} - node_filesystem_avail_bytes{server=~\"$server\",device!~'rootfs'}) \n/ node_filesystem_size_bytes{server=~\"$server\",device!~'rootfs'}",
+                        "expr": "(node_filesystem_size_bytes{server=~\"$server\",device!~'rootfs',mountpoint=\"/\"} - node_filesystem_avail_bytes{server=~\"$server\",device!~'rootfs',mountpoint=\"/\"}) \n/ node_filesystem_size_bytes{server=~\"$server\",device!~'rootfs',mountpoint=\"/\"}",
                         "format": "time_series",
                         "legendFormat": "[{{server}}] {{mountpoint}}",
                         "range": true,
@@ -5655,7 +5655,7 @@
         "kind": "Panel",
         "spec": {
           "id": 345,
-          "title": "Disk write IOps",
+          "title": "Disk write IOps*",
           "description": "Number of I/O operations completed per second for the device (after merges), only writes",
           "links": [],
           "data": {
@@ -5792,7 +5792,7 @@
         "kind": "Panel",
         "spec": {
           "id": 346,
-          "title": "Disk Average Wait Time (write)",
+          "title": "Disk Average Wait Time (write)*",
           "description": "Average time for requests issued to the device to be served. This includes the time spent by the requests in queue and the time spent servicing them.",
           "links": [],
           "data": {
@@ -6080,7 +6080,7 @@
         "kind": "Panel",
         "spec": {
           "id": 348,
-          "title": "Disk write bytes",
+          "title": "Disk write bytes *",
           "description": "Number of bytes written to the device per second",
           "links": [],
           "data": {
@@ -6678,7 +6678,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (server, mode) (\n  rate(node_cpu_seconds_total{server=~\"$server\", mode!~\"user|system\"}[5m])\n)",
+                        "expr": "sum by (server, mode) (\n  rate(node_cpu_seconds_total{server=~\"$server\", mode=\"system\"}[5m])\n)",
                         "format": "time_series",
                         "interval": "",
                         "legendFormat": "[{{server}}] - {{mode}}",
@@ -7560,7 +7560,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "node_filesystem_avail_bytes{server=~\"$server\",job=\"$job\",device!~'rootfs'}",
+                        "expr": "node_filesystem_avail_bytes{server=~\"$server\",job=\"$job\",device!~'rootfs',mountpoint=\"/\"}",
                         "format": "time_series",
                         "legendFormat": "[{{server}}] {{mountpoint}}",
                         "metric": "",
@@ -8305,7 +8305,7 @@
                       }
                     },
                     "refId": "C",
-                    "hidden": false
+                    "hidden": true
                   }
                 },
                 {
@@ -8327,7 +8327,7 @@
                       }
                     },
                     "refId": "D",
-                    "hidden": false
+                    "hidden": true
                   }
                 }
               ],
@@ -8604,7 +8604,7 @@
                       }
                     },
                     "refId": "B",
-                    "hidden": false
+                    "hidden": true
                   }
                 },
                 {
@@ -8627,7 +8627,7 @@
                       }
                     },
                     "refId": "C",
-                    "hidden": false
+                    "hidden": true
                   }
                 },
                 {
@@ -8650,7 +8650,7 @@
                       }
                     },
                     "refId": "D",
-                    "hidden": false
+                    "hidden": true
                   }
                 },
                 {
@@ -8673,7 +8673,7 @@
                       }
                     },
                     "refId": "E",
-                    "hidden": false
+                    "hidden": true
                   }
                 }
               ],
@@ -8988,7 +8988,7 @@
         "kind": "Panel",
         "spec": {
           "id": 84,
-          "title": "Network traffic in",
+          "title": "Network traffic in *",
           "description": "Incoming network traffic per interface",
           "links": [],
           "data": {
@@ -9007,7 +9007,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "rate(node_network_receive_bytes_total{server=~\"$server\",job=\"$job\"}[$__rate_interval])*8",
+                        "expr": "rate(node_network_receive_bytes_total{server=~\"$server\",job=\"$job\",device=\"enX0\"}[$__rate_interval])*8",
                         "format": "time_series",
                         "legendFormat": "[{{server}}] {{device}} - Rx in",
                         "range": true,
@@ -9672,7 +9672,7 @@
             "kind": "RowsLayoutRow",
             "spec": {
               "title": "Processes",
-              "collapse": true,
+              "collapse": false,
               "layout": {
                 "kind": "GridLayout",
                 "spec": {
@@ -9749,7 +9749,7 @@
                         "x": 0,
                         "y": 9,
                         "width": 12,
-                        "height": 13,
+                        "height": 9,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-175"
@@ -9772,34 +9772,8 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 12,
-                        "y": 18,
-                        "width": 12,
-                        "height": 13,
-                        "element": {
-                          "kind": "ElementReference",
-                          "name": "panel-78"
-                        }
-                      }
-                    },
-                    {
-                      "kind": "GridLayoutItem",
-                      "spec": {
                         "x": 0,
-                        "y": 22,
-                        "width": 12,
-                        "height": 10,
-                        "element": {
-                          "kind": "ElementReference",
-                          "name": "panel-131"
-                        }
-                      }
-                    },
-                    {
-                      "kind": "GridLayoutItem",
-                      "spec": {
-                        "x": 12,
-                        "y": 31,
+                        "y": 18,
                         "width": 12,
                         "height": 10,
                         "element": {
@@ -9811,8 +9785,34 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
+                        "x": 12,
+                        "y": 18,
+                        "width": 12,
+                        "height": 10,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-78"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
                         "x": 0,
-                        "y": 41,
+                        "y": 28,
+                        "width": 12,
+                        "height": 10,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-131"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 0,
+                        "y": 38,
                         "width": 24,
                         "height": 13,
                         "element": {
@@ -10233,7 +10233,7 @@
                         "x": 0,
                         "y": 0,
                         "width": 12,
-                        "height": 14,
+                        "height": 10,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-156"
@@ -10246,7 +10246,7 @@
                         "x": 12,
                         "y": 0,
                         "width": 12,
-                        "height": 14,
+                        "height": 10,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-43"
@@ -10257,9 +10257,9 @@
                       "kind": "GridLayoutItem",
                       "spec": {
                         "x": 0,
-                        "y": 14,
+                        "y": 10,
                         "width": 12,
-                        "height": 14,
+                        "height": 10,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-343"
@@ -10270,9 +10270,9 @@
                       "kind": "GridLayoutItem",
                       "spec": {
                         "x": 12,
-                        "y": 14,
+                        "y": 10,
                         "width": 12,
-                        "height": 14,
+                        "height": 10,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-28"

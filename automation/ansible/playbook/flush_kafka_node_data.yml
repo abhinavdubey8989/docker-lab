@@ -1,5 +1,5 @@
 ---
-- name: Reset Kafka + restart node-exporter (benchmark clean state)
+- name: Reset Kafka volume & restart node-exporter on kafka-nodes
   hosts: kafka_node
   become: yes
 

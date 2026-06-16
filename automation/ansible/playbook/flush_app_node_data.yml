@@ -1,5 +1,5 @@
 ---
-- name: Clean restart application containers
+- name: Stopping application containers & restarting node-exporter on application-nodes
   hosts: app_server
   become: true
 
@@ -34,21 +34,8 @@
       debug:
         var: prune_output.stdout_lines
 
-    # ------------------------------------
-    # 3. Start fresh containers
-    # ------------------------------------
-    - name: Start application containers (fresh JVM + metrics reset)
-      community.docker.docker_compose_v2:
-        project_src: "{{ compose_dir }}"
-        state: present
-      register: start_output
-
-    - name: Show start output
-      debug:
-        var: start_output
-
     # --------------------------------------
-    # 4. Restart node-exporter
+    # 3. Restart node-exporter
     # --------------------------------------
     - name: Restart node exporter
       command: >

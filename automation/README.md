@@ -21,11 +21,14 @@ This readme lists down steps for setting up the node from where we would run Ans
     - Scroll to `Access keys` section & click `Create access key`, choose use-case as `CLI`
     - Now copy the `Access key` & `Secret access key` to secure place (DO NOT SHARE THIS WITH ANYONE)
 
+
 - Do aws configure
-
+```bash
+aws configure
 ```
-(run CLI : `aws configure`)
 
+Then you'll be prompted to answer the below :
+```
 AWS Access Key ID [None]: Access key from previous step
 AWS Secret Access Key [None]: Secret access key from previous step
 Default region name [None]: ap-south-1

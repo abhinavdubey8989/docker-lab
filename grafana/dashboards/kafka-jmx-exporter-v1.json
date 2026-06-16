@@ -3,8 +3,8 @@
   "kind": "Dashboard",
   "metadata": {
     "name": "i8HLvrkiz",
-    "generation": 5,
-    "creationTimestamp": "2026-06-14T10:02:04Z",
+    "generation": 6,
+    "creationTimestamp": "2026-06-16T14:42:37Z",
     "labels": {},
     "annotations": {}
   },
@@ -40,7 +40,7 @@
         "kind": "Panel",
         "spec": {
           "id": 60,
-          "title": "Kafka Process CPU Usage",
+          "title": "Kafka Process CPU Usage*",
           "description": "CPU used by Kafka JVM process. Detect broker CPU saturation.",
           "links": [],
           "data": {
@@ -340,7 +340,7 @@
                       }
                     },
                     "refId": "B",
-                    "hidden": false
+                    "hidden": true
                   }
                 }
               ],
@@ -432,32 +432,7 @@
                     }
                   }
                 },
-                "overrides": [
-                  {
-                    "__systemRef": "hideSeriesFrom",
-                    "matcher": {
-                      "id": "byNames",
-                      "options": {
-                        "mode": "exclude",
-                        "names": [
-                          "[json] - used"
-                        ],
-                        "prefix": "All except:",
-                        "readOnly": true
-                      }
-                    },
-                    "properties": [
-                      {
-                        "id": "custom.hideFrom",
-                        "value": {
-                          "legend": false,
-                          "tooltip": true,
-                          "viz": true
-                        }
-                      }
-                    ]
-                  }
-                ]
+                "overrides": []
               }
             }
           }
@@ -1254,7 +1229,7 @@
         "kind": "Panel",
         "spec": {
           "id": 70,
-          "title": "Free memory",
+          "title": "Free memory*",
           "description": "Available RAM on the host/container",
           "links": [],
           "data": {
@@ -1381,7 +1356,7 @@
         "kind": "Panel",
         "spec": {
           "id": 71,
-          "title": "Load Average (normalised)",
+          "title": "Load Average (normalised)*",
           "description": "Load avg. divided by CPU cores (reported as %)",
           "links": [],
           "data": {
@@ -1593,7 +1568,7 @@
         "kind": "Panel",
         "spec": {
           "id": 74,
-          "title": "Bytes in per second",
+          "title": "Bytes in per second*",
           "description": "Total inbound traffic received from producers and replication traffic. Primary write-throughput metric.",
           "links": [],
           "data": {
@@ -2355,7 +2330,7 @@
         "kind": "Panel",
         "spec": {
           "id": 80,
-          "title": "Messages in per second",
+          "title": "Messages in per second*",
           "description": "Number of messages accepted by the broker per second. Useful for throughput analysis.",
           "links": [],
           "data": {
@@ -3239,6 +3214,387 @@
             }
           }
         }
+      },
+      "panel-87": {
+        "kind": "Panel",
+        "spec": {
+          "id": 87,
+          "title": "Request Latency (p50) - Total Time",
+          "description": "Median end-to-end time (50th percentile) the broker takes to process various requests, measured from when the request is received until the response is sent back.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "kafka_network_requestmetrics_50thpercentile{server=~\"$server\", name=\"TotalTimeMs\", request=\"Produce\"}",
+                        "legendFormat": "[{{server}}] - {{request}}",
+                        "range": true
+                      },
+                      "labels": {
+                        "grafana.app/export-label": "prometheus-1"
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "13.1.0-25957875840",
+            "spec": {
+              "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "calcs": [
+                    "min",
+                    "max",
+                    "mean",
+                    "last"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "ms",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 80,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 20,
+                    "gradientMode": "opacity",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "linear",
+                    "lineStyle": {
+                      "fill": "solid"
+                    },
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "never",
+                    "showValues": false,
+                    "spanNulls": true,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-88": {
+        "kind": "Panel",
+        "spec": {
+          "id": 88,
+          "title": "kafka log log value*",
+          "description": "different values of kafka_log_log_value",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum by (server, topic, name) (\n  kafka_log_log_value{\n    server=~\"$server\",\n    name=\"Size\",\n    topic=~\"$topic\",\n    topic!~\"__consumer_offsets|_schemas|__cluster_metadata\"\n  }\n)",
+                        "legendFormat": "[{{server}}] - {{topic}} - {{name}}",
+                        "range": true
+                      },
+                      "labels": {
+                        "grafana.app/export-label": "prometheus-1"
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "13.1.0-25957875840",
+            "spec": {
+              "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "calcs": [
+                    "min",
+                    "max",
+                    "mean",
+                    "last"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "decbytes",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 80,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 20,
+                    "gradientMode": "opacity",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "linear",
+                    "lineStyle": {
+                      "fill": "solid"
+                    },
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "never",
+                    "showValues": false,
+                    "spanNulls": true,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-89": {
+        "kind": "Panel",
+        "spec": {
+          "id": 89,
+          "title": "kafka log log value rate",
+          "description": "different values of kafka_log_log_value rate",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum by (server, topic, name)\n (rate(kafka_log_log_value{\n    server=~\"$server\",\n    name=\"Size\",\n    topic=~\"$topic\",\n    topic!~\"__consumer_offsets|_schemas|__cluster_metadata\"\n  }[1m]))",
+                        "legendFormat": "[{{server}}] - {{topic}} - {{name}}",
+                        "range": true
+                      },
+                      "labels": {
+                        "grafana.app/export-label": "prometheus-1"
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "13.1.0-25957875840",
+            "spec": {
+              "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "calcs": [
+                    "min",
+                    "max",
+                    "mean",
+                    "last"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "Bps",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 80,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 20,
+                    "gradientMode": "opacity",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "linear",
+                    "lineStyle": {
+                      "fill": "solid"
+                    },
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "never",
+                    "showValues": false,
+                    "spanNulls": true,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
       }
     },
     "layout": {
@@ -3381,7 +3737,7 @@
                         "height": 10,
                         "element": {
                           "kind": "ElementReference",
-                          "name": "panel-67"
+                          "name": "panel-87"
                         }
                       }
                     },
@@ -3394,7 +3750,7 @@
                         "height": 10,
                         "element": {
                           "kind": "ElementReference",
-                          "name": "panel-72"
+                          "name": "panel-67"
                         }
                       }
                     },
@@ -3408,6 +3764,45 @@
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-68"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 0,
+                        "y": 40,
+                        "width": 12,
+                        "height": 10,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-89"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 12,
+                        "y": 40,
+                        "width": 12,
+                        "height": 10,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-88"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 0,
+                        "y": 50,
+                        "width": 12,
+                        "height": 8,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-72"
                         }
                       }
                     }
@@ -3551,7 +3946,7 @@
             "kind": "RowsLayoutRow",
             "spec": {
               "title": "GC metrics",
-              "collapse": true,
+              "collapse": false,
               "layout": {
                 "kind": "AutoGridLayout",
                 "spec": {
@@ -3722,7 +4117,7 @@
             "version": "v0",
             "spec": {
               "qryType": 1,
-              "query": "label_values(kafka_cluster_partition_value{server=~\"$server\", topic!=\"__consumer_offsets\"}, topic!=\"_schemas\"},topic)",
+              "query": "label_values(kafka_cluster_partition_value{server=~\"$server\"},topic)",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
             "labels": {
@@ -3732,7 +4127,7 @@
           "regex": "",
           "regexApplyTo": "value",
           "sort": "disabled",
-          "definition": "label_values(kafka_cluster_partition_value{server=~\"$server\", topic!=\"__consumer_offsets\", topic!=\"_schemas\"},topic)",
+          "definition": "label_values(kafka_cluster_partition_value{server=~\"$server\"},topic)",
           "options": [],
           "multi": true,
           "includeAll": true,

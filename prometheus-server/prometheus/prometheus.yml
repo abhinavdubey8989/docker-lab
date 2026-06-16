@@ -25,7 +25,7 @@ scrape_configs:
           server: "kafka-json"
 
       - targets:
-          - "app.server.2:9100"
+          - "kafka.server.2:9100"
         labels:
           server: "kafka-avro"
 

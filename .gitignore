@@ -18,3 +18,7 @@ assets/temp/*
 
 # Ansible assets
 # automation/ansible/assets/*-application-docker.properties
+
+
+# Terraform state file
+**/.terraform.lock.hcl

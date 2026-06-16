@@ -1,9 +1,9 @@
 app_server:
   hosts:
     app_server_1:
-      ansible_host: 10.0.1.219
+      ansible_host: 10.0.1.88
     app_server_2:
-      ansible_host: 10.0.1.216
+      ansible_host: 10.0.1.17
 
   # common var for each host above
   vars:
@@ -14,9 +14,9 @@ app_server:
 kafka_node:
   hosts:
     kafka_node_1:
-      ansible_host: 10.0.1.125
+      ansible_host: 10.0.1.98
     kafka_node_2:
-      ansible_host: 10.0.1.168
+      ansible_host: 10.0.1.167
   vars:
     ansible_user: ubuntu
     ansible_ssh_private_key_file: ~/.ssh/ap-south-keypair-1.pem

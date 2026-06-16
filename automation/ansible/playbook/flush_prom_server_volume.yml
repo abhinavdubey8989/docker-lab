@@ -1,5 +1,5 @@
 ---
-- name: Reset Prometheus TSDB and restart Prometheus
+- name: Reset Prometheus TSDB & restart Prometheus
   hosts: monitoring
   become: yes
 
