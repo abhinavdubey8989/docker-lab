@@ -1,0 +1,30 @@
+---
+- name: Clone application (business-logic) GitHub repository to target nodes
+  hosts: app_server
+  become: yes
+
+  vars:
+    repo_url: "https://github.com/abhinavdubey8989/data-weave.git"
+    dest_path: "/home/ubuntu/data-weave"
+    branch: "feature/fine-tune" # or use "main"
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install git
+      apt:
+        name: git
+        state: present
+
+    - name: Clone or update GitHub repository
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ dest_path }}"
+        version: "{{ branch }}"
+        force: yes
+        update: yes
+      become: yes
+      become_user: ubuntu   # run as ubuntu, not root

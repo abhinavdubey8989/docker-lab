@@ -1,0 +1,19 @@
+---
+- name: Start application container on target-hosts
+  hosts: app_server
+  become: true
+
+  vars:
+    compose_dir: /home/ubuntu/data-weave   # change this to directory where docerker-compose.yml file preset
+
+  tasks:
+    - name: Ensure compose directory exists
+      file:
+        path: "{{ compose_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Run docker compose up -d
+      community.docker.docker_compose_v2:
+        project_src: "{{ compose_dir }}"
+        state: present

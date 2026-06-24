@@ -11,3 +11,14 @@ assets/temp/*
 
 # JAR files
 **/job-jars
+
+
+# Ansible inventory
+# **/inventory*.yml
+
+# Ansible assets
+# automation/ansible/assets/*-application-docker.properties
+
+
+# Terraform state file
+**/.terraform.lock.hcl

@@ -1,0 +1,12 @@
+---
+- name: Wait before next phase
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    sleep_seconds: 10
+
+  tasks:
+    - name: Pause for {{ sleep_seconds }} seconds
+      pause:
+        seconds: "{{ sleep_seconds }}"

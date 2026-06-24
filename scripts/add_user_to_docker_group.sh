@@ -21,7 +21,7 @@
 
 # Exit immediately if any command fails
 # Prevents partial/broken configuration
-set -e
+set -euo pipefail
 
 
 main() {

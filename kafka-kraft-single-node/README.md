@@ -38,28 +38,33 @@
 ## Schema-registry cURLs
 
 - List all subjects
-```
+```bash
 curl -X GET http://localhost:8081/subjects
 ```
 
 
 - Get all versions of a subject
-```
+```bash
 curl -X GET http://localhost:8081/subjects/<subject-name>/versions
 ```
 
 
 - Get latest schema for a subject
-```
-curl -X GET http://localhost:8081/subjects/<subject-name>/versions/latest
+```bash
+curl -X GET http://localhost:8081/subjects/<subject-name>/versions/latest | jq .
 
-# Get by version
-curl -X GET http://localhost:8081/subjects/<subject-name>/versions/
+```
+
+
+- Get latest schema for a subject (in-case you do not want the latest)
+```bash
+curl -X GET http://localhost:8081/subjects/<subject-name>/versions/:id | jq .
+
 ```
 
 
 - Check compatibility of a schema
-```
+```bash
 curl -X POST http://localhost:8081/compatibility/subjects/<subject-name>/versions/latest \
   -H "Content-Type: application/vnd.schemaregistry.v1+json" \
   -d '{
@@ -69,7 +74,7 @@ curl -X POST http://localhost:8081/compatibility/subjects/<subject-name>/version
 
 
 - Register new schema
-```
+```bash
 curl -X POST http://localhost:8081/subjects/user-value/versions \
   -H "Content-Type: application/vnd.schemaregistry.v1+json" \
   -d '{

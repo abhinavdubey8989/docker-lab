@@ -1,0 +1,58 @@
+---
+- name: Stopping application containers & restarting node-exporter on application-nodes
+  hosts: app_server
+  become: true
+
+  vars:
+    compose_dir: /home/ubuntu/data-weave
+    repo_path: "/home/ubuntu/docker-lab"
+    script_path: "{{ repo_path }}/scripts/start_stop.sh"
+    node_exporter_compose: "prometheus-node-exporter"
+
+  tasks:
+    # ------------------------------------
+    # 1. Stop + remove containers
+    # ------------------------------------
+    - name: Stop application containers (docker compose down)
+      community.docker.docker_compose_v2:
+        project_src: "{{ compose_dir }}"
+        state: absent
+      register: stop_output
+
+    - name: Show stop output
+      debug:
+        var: stop_output
+
+    # ------------------------------------
+    # 2. Ensure clean state (optional safety)
+    # ------------------------------------
+    - name: Remove dangling containers (extra cleanup)
+      command: docker container prune -f
+      register: prune_output
+
+    - name: Show prune output
+      debug:
+        var: prune_output.stdout_lines
+
+    # --------------------------------------
+    # 3. Restart node-exporter
+    # --------------------------------------
+    - name: Restart node exporter
+      command: >
+        {{ script_path }}
+        --file={{ node_exporter_compose }}
+        --action=1
+        --mode=d
+      args:
+        chdir: "{{ repo_path }}/scripts"
+      become_user: ubuntu
+      register: node_exporter_output
+
+    - name: Show node-exporter output
+      debug:
+        var: node_exporter_output.stdout_lines
+
+    - name: Show node-exporter errors
+      debug:
+        var: node_exporter_output.stderr_lines
+      when: node_exporter_output.stderr != ""

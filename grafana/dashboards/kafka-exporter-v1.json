@@ -3,8 +3,8 @@
   "kind": "Dashboard",
   "metadata": {
     "name": "jwPKIsniz",
-    "generation": 21,
-    "creationTimestamp": "2026-06-06T05:12:45Z",
+    "generation": 2,
+    "creationTimestamp": "2026-06-14T10:00:44Z",
     "labels": {},
     "annotations": {}
   },
@@ -180,10 +180,10 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum(rate(kafka_topic_partition_current_offset{server=~\"$server\", topic=~\"$topic\"}[1m])) by (topic)",
+                        "expr": "sum by (server, topic) (\n  rate(kafka_topic_partition_current_offset{server=~\"$server\", topic!~\".*(schema|consumer.*offset).*\"}[1m])\n)",
                         "format": "time_series",
                         "intervalFactor": 1,
-                        "legendFormat": "{{topic}}",
+                        "legendFormat": "[{{server}}] - {{topic}}",
                         "range": true
                       },
                       "labels": {
@@ -308,10 +308,10 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum(delta(kafka_topic_partition_current_offset{server=~'$server', topic=~\"$topic\"}[5m])/5) by (topic)",
+                        "expr": "sum(\n  delta(kafka_topic_partition_current_offset{server=~\"$server\", topic=~\"$topic\", topic!~\"__consumer_offsets|_schemas\"}[5m]) / 5\n) by (server, topic)",
                         "format": "time_series",
                         "intervalFactor": 1,
-                        "legendFormat": "{{topic}}",
+                        "legendFormat": "[{{server}}] - {{topic}}",
                         "range": true
                       },
                       "labels": {
@@ -1203,10 +1203,10 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by(topic) (kafka_topic_partition_current_offset{server=~\"$server\",topic=~\"$topic\"})",
+                        "expr": "sum by (server, topic) (\n  kafka_topic_partition_current_offset{\n    server=~\"$server\",\n    topic=~\"$topic\",\n    topic!~\"^__consumer_offsets$|.*schema.*|.*offset.*\"\n  }\n)",
                         "format": "time_series",
                         "intervalFactor": 1,
-                        "legendFormat": "{{topic}}",
+                        "legendFormat": "[{{server}}] - {{topic}}",
                         "range": true
                       },
                       "labels": {
@@ -1299,7 +1299,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (server, topic) (\n  kafka_topic_partition_under_replicated_partition{\n    server=~\"$server\",\n    topic=~\"$topic\"\n  }\n)",
+                        "expr": "sum by (server, topic) (\n  kafka_topic_partition_under_replicated_partition{\n    server=~\"$server\",\n    topic=~\"$topic\",\n    topic!~\".*(schema|consumer.*offset).*\"\n  }\n)",
                         "format": "time_series",
                         "intervalFactor": 1,
                         "legendFormat": "[{{server}}] - {{topic}}",
@@ -1329,8 +1329,13 @@
                   "multiLane": false
                 },
                 "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
+                  "calcs": [
+                    "last",
+                    "min",
+                    "max",
+                    "mean"
+                  ],
+                  "displayMode": "table",
                   "placement": "bottom",
                   "showLegend": true
                 },
@@ -1420,10 +1425,10 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by(topic) (kafka_topic_partitions{server=~\"$server\",topic=~\"$topic\"})",
+                        "expr": "sum by (server, topic) (\n  kafka_topic_partitions{\n    server=~\"$server\",\n    topic=~\"$topic\",\n    topic!~\"^__consumer_offsets$|.*schema.*|.*offset.*\"\n  }\n)",
                         "format": "time_series",
                         "intervalFactor": 1,
-                        "legendFormat": "{{topic}}",
+                        "legendFormat": "[{{server}}] - {{topic}}",
                         "range": true
                       },
                       "labels": {
@@ -1696,9 +1701,9 @@
     ],
     "timeSettings": {
       "timezone": "browser",
-      "from": "now-24h",
+      "from": "now-30m",
       "to": "now",
-      "autoRefresh": "",
+      "autoRefresh": "10s",
       "autoRefreshIntervals": [
         "5s",
         "10s",

@@ -3,8 +3,8 @@
   "kind": "Dashboard",
   "metadata": {
     "name": "i8HLvrkiz",
-    "generation": 24,
-    "creationTimestamp": "2026-06-06T07:31:29Z",
+    "generation": 6,
+    "creationTimestamp": "2026-06-16T14:42:37Z",
     "labels": {},
     "annotations": {}
   },
@@ -22,9 +22,6 @@
               "matchAny": false,
               "tags": [],
               "type": "dashboard"
-            },
-            "labels": {
-              "grafana.app/export-label": "grafana-1"
             }
           },
           "enable": true,
@@ -43,7 +40,7 @@
         "kind": "Panel",
         "spec": {
           "id": 60,
-          "title": "Kafka Process CPU Usage",
+          "title": "Kafka Process CPU Usage*",
           "description": "CPU used by Kafka JVM process. Detect broker CPU saturation.",
           "links": [],
           "data": {
@@ -343,7 +340,7 @@
                       }
                     },
                     "refId": "B",
-                    "hidden": false
+                    "hidden": true
                   }
                 }
               ],
@@ -435,32 +432,7 @@
                     }
                   }
                 },
-                "overrides": [
-                  {
-                    "__systemRef": "hideSeriesFrom",
-                    "matcher": {
-                      "id": "byNames",
-                      "options": {
-                        "mode": "exclude",
-                        "names": [
-                          "[json] - used"
-                        ],
-                        "prefix": "All except:",
-                        "readOnly": true
-                      }
-                    },
-                    "properties": [
-                      {
-                        "id": "custom.hideFrom",
-                        "value": {
-                          "legend": false,
-                          "tooltip": true,
-                          "viz": true
-                        }
-                      }
-                    ]
-                  }
-                ]
+                "overrides": []
               }
             }
           }
@@ -1257,7 +1229,7 @@
         "kind": "Panel",
         "spec": {
           "id": 70,
-          "title": "Free memory",
+          "title": "Free memory*",
           "description": "Available RAM on the host/container",
           "links": [],
           "data": {
@@ -1384,7 +1356,7 @@
         "kind": "Panel",
         "spec": {
           "id": 71,
-          "title": "Load Average (normalised)",
+          "title": "Load Average (normalised)*",
           "description": "Load avg. divided by CPU cores (reported as %)",
           "links": [],
           "data": {
@@ -1596,7 +1568,7 @@
         "kind": "Panel",
         "spec": {
           "id": 74,
-          "title": "Bytes in per second",
+          "title": "Bytes in per second*",
           "description": "Total inbound traffic received from producers and replication traffic. Primary write-throughput metric.",
           "links": [],
           "data": {
@@ -2358,7 +2330,7 @@
         "kind": "Panel",
         "spec": {
           "id": 80,
-          "title": "Messages in per second",
+          "title": "Messages in per second*",
           "description": "Number of messages accepted by the broker per second. Useful for throughput analysis.",
           "links": [],
           "data": {
@@ -2501,7 +2473,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by(server) (rate(kafka_server_brokertopicmetrics_count{name=\"TotalProduceRequestsPerSec\",server=~\"$server\",topic=~\"$topic\"}[5m]))",
+                        "expr": "sum by (server) (\n  rate(\n    kafka_server_brokertopicmetrics_count{\n      name=\"TotalProduceRequestsPerSec\",\n      server=~\"$server\",\n      topic=~\"$topic\",\n      topic!~\"(__consumer_offsets|_schemas)\"\n    }[5m]\n  )\n)",
                         "legendFormat": "{{server}}",
                         "range": true
                       },
@@ -2628,7 +2600,7 @@
                       "version": "v0",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by(server) (rate(kafka_server_brokertopicmetrics_count{name=\"TotalFetchRequestsPerSec\",server=~\"$server\",topic=~\"$topic\"}[5m]))",
+                        "expr": "sum by (server) (\n  rate(\n    kafka_server_brokertopicmetrics_count{\n      name=\"TotalFetchRequestsPerSec\",\n      server=~\"$server\",\n      topic=~\"$topic\",\n      topic!~\"(__consumer_offsets|_schemas)\"\n    }[5m]\n  )\n)",
                         "legendFormat": "{{server}}",
                         "range": true
                       },
@@ -3115,6 +3087,514 @@
             }
           }
         }
+      },
+      "panel-86": {
+        "kind": "Panel",
+        "spec": {
+          "id": 86,
+          "title": "Average Records per Produce Request",
+          "description": "Shows the average number of Kafka records contained in each ProduceRequest received by the broker.\n\nCalculated as:\n\nMessagesInPerSec ÷ TotalProduceRequestsPerSec\n\nHigher values indicate more efficient batching, where each ProduceRequest carries more records. Lower values indicate smaller batches and a higher ProduceRequest rate for the same message throughput.\n\nThis metric is useful for comparing producer batching behavior (for example, JSON vs AVRO serialization) while normalizing for differences in message throughput.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum by(server) (\n  rate(\n    kafka_server_brokertopicmetrics_count{\n      name=\"MessagesInPerSec\",\n      server=~\"$server\",\n      topic=~\"$topic\",\n      topic!~\"(__consumer_offsets|_schemas)\"\n    }[5m]\n  )\n)\n/\nsum by(server) (\n  rate(\n    kafka_server_brokertopicmetrics_count{\n      name=\"TotalProduceRequestsPerSec\",\n      server=~\"$server\",\n      topic=~\"$topic\",\n      topic!~\"(__consumer_offsets|_schemas)\"\n    }[5m]\n  )\n)",
+                        "legendFormat": "{{server}}",
+                        "range": true
+                      },
+                      "labels": {
+                        "grafana.app/export-label": "prometheus-1"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "13.1.0-25957875840",
+            "spec": {
+              "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "calcs": [
+                    "min",
+                    "max",
+                    "mean",
+                    "last"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 80,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 20,
+                    "gradientMode": "opacity",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "linear",
+                    "lineStyle": {
+                      "fill": "solid"
+                    },
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "never",
+                    "showValues": false,
+                    "spanNulls": true,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-87": {
+        "kind": "Panel",
+        "spec": {
+          "id": 87,
+          "title": "Request Latency (p50) - Total Time",
+          "description": "Median end-to-end time (50th percentile) the broker takes to process various requests, measured from when the request is received until the response is sent back.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "kafka_network_requestmetrics_50thpercentile{server=~\"$server\", name=\"TotalTimeMs\", request=\"Produce\"}",
+                        "legendFormat": "[{{server}}] - {{request}}",
+                        "range": true
+                      },
+                      "labels": {
+                        "grafana.app/export-label": "prometheus-1"
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "13.1.0-25957875840",
+            "spec": {
+              "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "calcs": [
+                    "min",
+                    "max",
+                    "mean",
+                    "last"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "ms",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 80,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 20,
+                    "gradientMode": "opacity",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "linear",
+                    "lineStyle": {
+                      "fill": "solid"
+                    },
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "never",
+                    "showValues": false,
+                    "spanNulls": true,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-88": {
+        "kind": "Panel",
+        "spec": {
+          "id": 88,
+          "title": "kafka log log value*",
+          "description": "different values of kafka_log_log_value",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum by (server, topic, name) (\n  kafka_log_log_value{\n    server=~\"$server\",\n    name=\"Size\",\n    topic=~\"$topic\",\n    topic!~\"__consumer_offsets|_schemas|__cluster_metadata\"\n  }\n)",
+                        "legendFormat": "[{{server}}] - {{topic}} - {{name}}",
+                        "range": true
+                      },
+                      "labels": {
+                        "grafana.app/export-label": "prometheus-1"
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "13.1.0-25957875840",
+            "spec": {
+              "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "calcs": [
+                    "min",
+                    "max",
+                    "mean",
+                    "last"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "decbytes",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 80,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 20,
+                    "gradientMode": "opacity",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "linear",
+                    "lineStyle": {
+                      "fill": "solid"
+                    },
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "never",
+                    "showValues": false,
+                    "spanNulls": true,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-89": {
+        "kind": "Panel",
+        "spec": {
+          "id": 89,
+          "title": "kafka log log value rate",
+          "description": "different values of kafka_log_log_value rate",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum by (server, topic, name)\n (rate(kafka_log_log_value{\n    server=~\"$server\",\n    name=\"Size\",\n    topic=~\"$topic\",\n    topic!~\"__consumer_offsets|_schemas|__cluster_metadata\"\n  }[1m]))",
+                        "legendFormat": "[{{server}}] - {{topic}} - {{name}}",
+                        "range": true
+                      },
+                      "labels": {
+                        "grafana.app/export-label": "prometheus-1"
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "13.1.0-25957875840",
+            "spec": {
+              "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "calcs": [
+                    "min",
+                    "max",
+                    "mean",
+                    "last"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "Bps",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 80,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 20,
+                    "gradientMode": "opacity",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "linear",
+                    "lineStyle": {
+                      "fill": "solid"
+                    },
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "never",
+                    "showValues": false,
+                    "spanNulls": true,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
       }
     },
     "layout": {
@@ -3257,7 +3737,7 @@
                         "height": 10,
                         "element": {
                           "kind": "ElementReference",
-                          "name": "panel-67"
+                          "name": "panel-87"
                         }
                       }
                     },
@@ -3270,7 +3750,7 @@
                         "height": 10,
                         "element": {
                           "kind": "ElementReference",
-                          "name": "panel-72"
+                          "name": "panel-67"
                         }
                       }
                     },
@@ -3286,6 +3766,45 @@
                           "name": "panel-68"
                         }
                       }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 0,
+                        "y": 40,
+                        "width": 12,
+                        "height": 10,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-89"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 12,
+                        "y": 40,
+                        "width": 12,
+                        "height": 10,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-88"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 0,
+                        "y": 50,
+                        "width": 12,
+                        "height": 8,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-72"
+                        }
+                      }
                     }
                   ]
                 }
@@ -3298,15 +3817,16 @@
               "title": "Network metrics",
               "collapse": false,
               "layout": {
-                "kind": "AutoGridLayout",
+                "kind": "GridLayout",
                 "spec": {
-                  "maxColumnCount": 2,
-                  "columnWidthMode": "standard",
-                  "rowHeightMode": "standard",
                   "items": [
                     {
-                      "kind": "AutoGridLayoutItem",
+                      "kind": "GridLayoutItem",
                       "spec": {
+                        "x": 0,
+                        "y": 0,
+                        "width": 12,
+                        "height": 9,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-74"
@@ -3314,8 +3834,12 @@
                       }
                     },
                     {
-                      "kind": "AutoGridLayoutItem",
+                      "kind": "GridLayoutItem",
                       "spec": {
+                        "x": 12,
+                        "y": 0,
+                        "width": 12,
+                        "height": 9,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-79"
@@ -3323,8 +3847,12 @@
                       }
                     },
                     {
-                      "kind": "AutoGridLayoutItem",
+                      "kind": "GridLayoutItem",
                       "spec": {
+                        "x": 0,
+                        "y": 9,
+                        "width": 12,
+                        "height": 9,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-80"
@@ -3332,8 +3860,12 @@
                       }
                     },
                     {
-                      "kind": "AutoGridLayoutItem",
+                      "kind": "GridLayoutItem",
                       "spec": {
+                        "x": 12,
+                        "y": 9,
+                        "width": 12,
+                        "height": 9,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-84"
@@ -3341,8 +3873,25 @@
                       }
                     },
                     {
-                      "kind": "AutoGridLayoutItem",
+                      "kind": "GridLayoutItem",
                       "spec": {
+                        "x": 0,
+                        "y": 18,
+                        "width": 24,
+                        "height": 9,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-86"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 0,
+                        "y": 27,
+                        "width": 12,
+                        "height": 9,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-81"
@@ -3350,8 +3899,12 @@
                       }
                     },
                     {
-                      "kind": "AutoGridLayoutItem",
+                      "kind": "GridLayoutItem",
                       "spec": {
+                        "x": 12,
+                        "y": 27,
+                        "width": 12,
+                        "height": 9,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-82"
@@ -3359,8 +3912,12 @@
                       }
                     },
                     {
-                      "kind": "AutoGridLayoutItem",
+                      "kind": "GridLayoutItem",
                       "spec": {
+                        "x": 0,
+                        "y": 36,
+                        "width": 12,
+                        "height": 9,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-83"
@@ -3368,8 +3925,12 @@
                       }
                     },
                     {
-                      "kind": "AutoGridLayoutItem",
+                      "kind": "GridLayoutItem",
                       "spec": {
+                        "x": 12,
+                        "y": 36,
+                        "width": 12,
+                        "height": 9,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-85"
@@ -3445,10 +4006,11 @@
     ],
     "timeSettings": {
       "timezone": "browser",
-      "from": "now-12h",
+      "from": "now-1h",
       "to": "now",
-      "autoRefresh": "",
+      "autoRefresh": "10s",
       "autoRefreshIntervals": [
+        "5s",
         "10s",
         "30s",
         "1m",
@@ -3555,7 +4117,7 @@
             "version": "v0",
             "spec": {
               "qryType": 1,
-              "query": "label_values(kafka_cluster_partition_value{server=~\"$server\", topic!=\"__consumer_offsets\"}, topic!=\"_schemas\"},topic)",
+              "query": "label_values(kafka_cluster_partition_value{server=~\"$server\"},topic)",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
             "labels": {
@@ -3565,7 +4127,7 @@
           "regex": "",
           "regexApplyTo": "value",
           "sort": "disabled",
-          "definition": "label_values(kafka_cluster_partition_value{server=~\"$server\", topic!=\"__consumer_offsets\", topic!=\"_schemas\"},topic)",
+          "definition": "label_values(kafka_cluster_partition_value{server=~\"$server\"},topic)",
           "options": [],
           "multi": true,
           "includeAll": true,

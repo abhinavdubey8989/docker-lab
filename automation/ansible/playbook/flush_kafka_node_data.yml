@@ -1,0 +1,59 @@
+---
+- name: Reset Kafka volume & restart node-exporter on kafka-nodes
+  hosts: kafka_node
+  become: yes
+
+  vars:
+    repo_path: "/home/ubuntu/docker-lab"
+    script_path: "{{ repo_path }}/scripts/start_stop.sh"
+    kafka_compose: "kafka-kraft-single-node/docker-compose-host-nw.yml"
+    node_exporter_compose: "prometheus-node-exporter"
+
+  tasks:
+    # --------------------------------------
+    # 1. Reset Kafka completely
+    # --------------------------------------
+    - name: Reset Kafka volumes and restart Kafka
+      command: >
+        {{ script_path }}
+        --file={{ kafka_compose }}
+        --action=1
+        --mode=d
+        --volume-clear=true
+        --prune-dangling-volumes=true
+      args:
+        chdir: "{{ repo_path }}/scripts"
+      become_user: ubuntu
+      register: kafka_output
+
+    - name: Show Kafka output
+      debug:
+        var: kafka_output.stdout_lines
+
+    - name: Show Kafka errors
+      debug:
+        var: kafka_output.stderr_lines
+      when: kafka_output.stderr != ""
+
+    # --------------------------------------
+    # 2. Restart node-exporter
+    # --------------------------------------
+    - name: Restart node exporter
+      command: >
+        {{ script_path }}
+        --file={{ node_exporter_compose }}
+        --action=1
+        --mode=d
+      args:
+        chdir: "{{ repo_path }}/scripts"
+      become_user: ubuntu
+      register: node_exporter_output
+
+    - name: Show node-exporter output
+      debug:
+        var: node_exporter_output.stdout_lines
+
+    - name: Show node-exporter errors
+      debug:
+        var: node_exporter_output.stderr_lines
+      when: node_exporter_output.stderr != ""
